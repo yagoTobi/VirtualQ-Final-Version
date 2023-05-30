@@ -1,0 +1,18 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+.header {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.btn-primary {
+  background-color: #3584ed; /* Dark blue */
+  border-color: #165cb7;
+}
+
+.btn-primary:click {
+  background-color: #001a40; /* Slightly darker blue */
+  border-color: #001a40;
+}

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Visit</title>
+    <style>
+        body {
+            background-color: #0077B6;
+            color: #000000;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background: #fff;
+            padding: 2em;
+            border-radius: 1em;
+            box-shadow: 0px 8px 20px 0px rgba(0, 0, 0, 0.15);
+            position: relative;
+            height: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #0077B6;
+        }
+
+        .form-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            flex: 1;
+        }
+
+        .form-container form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-container form label {
+            color: #333;
+        }
+
+        .form-container form p {
+            margin-bottom: 1em;
+        }
+
+        .form-container form button {
+            background-color: #0077B6;
+            color: #ffffff;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 1em;
+        }
+
+        .form-container form input {
+            color: #333;
+        }
+
+        .qr-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .guests-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .qr-code {
+            flex: 0 0 auto;
+            margin: 10px;
+            max-width: 100px;
+            height: auto;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            padding: 10px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .footer a {
+            color: #fff;
+            text-decoration: none;
+            background-color: #0077B6;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px;
+        }
+
+        /* Mobile styling */
+        @media only screen and (max-width: 600px) {
+            .container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Book Your Visit</h1>
+
+        <div class="form-container">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Book visit</button>
+            </form>
+        </div>
+
+        <div class="qr-container">
+            <h2>Your QR Codes</h2>
+            {% if qr_codes %}
+            <h3>Main User Ticket</h3>
+            <img class="qr-code" src="data:image/jpeg;base64,{{ qr_codes.0 }}" alt="QR Code" />
+            {% if qr_codes|length > 1 %}
+            <h3>Additional Guest Tickets</h3>
+            <div class="guests-container">
+                {% for qr in qr_codes|slice:"1:" %}
+                <img class="qr-code" src="data:image/jpeg;base64,{{ qr }}" alt="QR Code" />
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% else %}
+            <p>No QR codes available yet.</p>
+            {% endif %}
+
+
+            <div class="footer">
+                <a href="{% url 'logout' %}">Logout</a>
+                <a href="exp://192.168.1.146:19000">Go back to the App</a>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
