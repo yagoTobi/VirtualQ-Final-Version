@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Linking,
   FlatList,
   Dimensions,
   Image,
@@ -14,9 +13,9 @@ import Modal from "react-native-modal";
 import Carousel from "react-native-snap-carousel";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
+import ReservationBanner from "../components/ReservationBanner";
 import AuthContext from "../AuthContext";
 import { API_BASE_URL } from "../constants";
-import { Ionicons } from "@expo/vector-icons";
 import { Pagination } from "react-native-snap-carousel";
 import { format } from "date-fns";
 
@@ -39,7 +38,24 @@ const ReservationHubScreen = ({ navigation }) => {
 
     if (response.ok) {
       const data = await response.json();
-      setReservations(data);
+
+      // Sort reservations by date and start_time
+      data.sort((a, b) => {
+        const dateA = new Date(a.date + "T" + a.start_time);
+        const dateB = new Date(b.date + "T" + b.start_time);
+        return dateA - dateB;
+      });
+
+      const groupedData = data.reduce((acc, current) => {
+        const date = format(new Date(current.date), "yyyy-MM-dd");
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(current);
+        return acc;
+      }, {});
+
+      setReservations(groupedData); // set state with grouped data
     } else {
       console.error("Failed to fetch reservations");
     }
@@ -49,23 +65,16 @@ const ReservationHubScreen = ({ navigation }) => {
     setSelectedReservations(reservations);
   };
 
+  //TODO
+  const handleCancelReservation = async (reservation) => {
+    // API call to delete reservation here...
+    // After successful API call, update reservations state
+    //setReservations(reservations.filter((r) => r !== reservation));
+  };
+
   const handleModalClose = () => {
     setSelectedReservations(null);
   };
-
-  const groupedReservations = reservations.reduce((groups, reservation) => {
-    const date = format(new Date(reservation.date), "yyyy-MM-dd");
-    const time = reservation.start_time;
-    const ride = reservation.ride_name;
-    const key = `${date}-${time}-${ride}`;
-    if (!groups[key]) {
-      groups[key] = [];
-    }
-    groups[key].push(reservation);
-    return groups;
-  }, {});
-
-  const keys = Object.keys(groupedReservations);
 
   const renderCarouselItem = ({ item, index }) => (
     <View style={styles.carouselItem}>
@@ -74,34 +83,36 @@ const ReservationHubScreen = ({ navigation }) => {
     </View>
   );
 
+  const renderItem = (item) => {
+    const [date, reservations] = item;
+    return (
+      <View>
+        <Text style={styles.dateText}>
+          {format(new Date(date), "yyyy-MM-dd")}
+        </Text>
+        {reservations.map((reservation) => (
+          <ReservationBanner
+            key={reservation.reservation_id}
+            reservation={reservation}
+            onCancel={handleCancelReservation}
+            onPress={() => handleReservationPress(reservation)}
+          />
+        ))}
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <Header title="Virtual Q." />
       <Text style={styles.title}>Your Reservations</Text>
       <FlatList
-        data={keys}
-        keyExtractor={(item) => item}
-        renderItem={({ item: key }) => {
-          const [date, time, ride] = key.split("-");
-          const reservationsForItem = groupedReservations[key];
-          const firstReservation = reservationsForItem[0];
-          return (
-            <TouchableOpacity
-              style={styles.reservationItem}
-              onPress={() => handleReservationPress(reservationsForItem)}
-            >
-              <Image
-                style={styles.reservationImage}
-                source={{ uri: ride.ride_thumbnail }}
-              />
-              <Text style={styles.reservationTitle}>{ride}</Text>
-              <Text style={styles.reservationTime}>
-                {format(new Date(date), "EEEE, MMMM do yyyy")} at {time}
-              </Text>
-            </TouchableOpacity>
-          );
-        }}
+        data={Object.entries(reservations)}
+        keyExtractor={(item, index) => index.toString()}
+        renderItem={({ item }) => renderItem(item)}
       />
+
+      <Footer navigation={navigation} />
       <Modal
         isVisible={!!selectedReservations}
         onBackdropPress={handleModalClose}
@@ -119,7 +130,6 @@ const ReservationHubScreen = ({ navigation }) => {
           activeDotIndex={activeSlide}
         />
       </Modal>
-      <Footer navigation={navigation} />
     </View>
   );
 };
@@ -192,6 +202,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 2,
     backgroundColor: "rgba(0, 0, 0, 0.75)",
+  },
+  dateText: {
+    fontSize: 20,
+    textAlign: "center",
+    marginVertical: 20,
+    color: "white",
   },
 });
 
