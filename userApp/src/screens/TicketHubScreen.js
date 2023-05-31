@@ -40,6 +40,11 @@ const TicketHubScreen = ({ navigation }) => {
 
     if (response.ok) {
       const data = await response.json();
+      // Sort tickets by date
+      data.sort(
+        (a, b) => new Date(a.date_of_visit) - new Date(b.date_of_visit)
+      );
+
       setTickets(data);
     } else {
       console.error("Failed to fetch tickets");
@@ -47,7 +52,6 @@ const TicketHubScreen = ({ navigation }) => {
   };
 
   const handleBookTickets = () => {
-    //TODO Replace this URL with the URL of your Django template
     const url = `${API_BASE_URL}/api/tickets/login/`;
     Linking.openURL(url);
   };
@@ -58,6 +62,12 @@ const TicketHubScreen = ({ navigation }) => {
 
   const handleModalClose = () => {
     setSelectedTickets(null);
+  };
+
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const formattedDate = format(date, "EEEE, MMMM do yyyy");
+    return date < new Date() ? `${formattedDate} [ARCHIVED]` : formattedDate;
   };
 
   const groupedTickets = tickets.reduce((groups, ticket) => {
@@ -75,7 +85,7 @@ const TicketHubScreen = ({ navigation }) => {
     <View style={styles.carouselItem}>
       <Text style={styles.carouselItemTitle}>Visitor {index + 1}</Text>
       <Text style={styles.carouselItemSubtitle}>
-        {format(new Date(item.date_of_visit), "EEEE, MMMM do yyyy")}
+        {formatDate(item.date_of_visit)}
       </Text>
       <QRCode value={item.ticket_id.toString()} size={200} />
     </View>
@@ -91,7 +101,7 @@ const TicketHubScreen = ({ navigation }) => {
           renderItem={({ item: date }) => (
             <View>
               <Text style={styles.date}>
-                {format(new Date(date), "EEEE, MMMM do yyyy")}
+                <Text style={styles.date}>{formatDate(date)}</Text>
               </Text>
               {groupedTickets[date].map((ticket, index) => (
                 <TouchableOpacity

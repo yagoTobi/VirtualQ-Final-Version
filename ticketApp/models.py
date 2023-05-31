@@ -46,7 +46,7 @@ class Guest(models.Model):
     ticket = models.OneToOneField(
         Ticket, on_delete=models.CASCADE, related_name="guest"
     )
-    name = models.CharField(max_length=20, blank=True, null=True)
+    name = models.CharField(max_length=20, blank=True, null=True, default="Visitor")
     age = models.IntegerField(null=True, blank=True)
     picture = models.CharField(
         max_length=10, choices=PICTURE_CHOICES, blank=True, null=True

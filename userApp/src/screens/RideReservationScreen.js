@@ -19,6 +19,7 @@ import {
   format,
   formatISO,
   differenceInDays,
+  parseISO,
 } from "date-fns";
 
 import Header from "../components/Header";
@@ -47,6 +48,13 @@ const RideReservationScreen = ({ route, navigation }) => {
   useEffect(() => {
     fetchGuests();
   }, []);
+
+  useEffect(() => {
+    if (guests && selectedDate) {
+      const selectedDateStr = format(selectedDate, "yyyy-MM-dd");
+      setGuestsForSelectedDate(guests[selectedDateStr] || []);
+    }
+  }, [guests, selectedDate]);
 
   const getTimeslots = () => {
     let timeslots = [];
@@ -203,9 +211,9 @@ const RideReservationScreen = ({ route, navigation }) => {
   };
 
   const handleTimeslotPress = (timeslot) => {
-    if (!selectedDate || differenceInDays(selectedDate, new Date()) > 15) {
+    if (!selectedDate || differenceInDays(selectedDate, new Date()) > 2) {
       Alert.alert(
-        "Virtual Q. doesn't allow for reservations over 15 days in advance"
+        "Virtual Q. doesn't allow for reservations over 2 days in advance"
       );
       return;
     }
@@ -213,17 +221,23 @@ const RideReservationScreen = ({ route, navigation }) => {
     setModalVisible(true);
   };
 
-  const onDateChange = (newDate) => {
-    const parsedDate = new Date(newDate);
+  const onDateChange = (formattedDate) => {
+    const parsedDate = parseISO(formattedDate);
+
     // Check if selected date is more than 15 days in advance
-    if (differenceInDays(parsedDate, new Date()) > 15) {
+    if (differenceInDays(parsedDate, new Date()) > 2) {
       Alert.alert(
-        "Virtual Q. doesn't allow for reservations over 15 days in advance"
+        "Virtual Q. doesn't allow for reservations over 2 days in advance"
       );
       return;
     }
+
+    // Format selectedDate in the same way as date_of_visit
+    const selectedDateStr = format(parsedDate, "yyyy-MM-dd");
+
     setSelectedDate(parsedDate);
-    setGuestsForSelectedDate(guests[newDate.toString()] || []);
+    setGuestsForSelectedDate(guests[selectedDateStr] || []);
+    console.log(guestsForSelectedDate);
   };
 
   const handleSelectGuest = (guestId) => {
@@ -407,16 +421,14 @@ const RideReservationScreen = ({ route, navigation }) => {
         </Text>
         {/*Inside your component*/}
         <Picker
-          selectedValue={
-            selectedDate ? format(selectedDate, "do MMMM yyyy") : ""
-          }
+          selectedValue={selectedDate ? format(selectedDate, "yyyy-MM-dd") : ""}
           onValueChange={onDateChange}
         >
           {dates.map((date) => (
             <Picker.Item
               key={date}
               label={format(new Date(date), "do MMMM yyyy")}
-              value={date}
+              value={format(new Date(date), "yyyy-MM-dd")}
             />
           ))}
         </Picker>
