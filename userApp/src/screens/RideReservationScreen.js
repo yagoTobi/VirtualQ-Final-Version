@@ -339,11 +339,7 @@ const RideReservationScreen = ({ route, navigation }) => {
     });
 
     if (!response.ok) {
-      const errorResponse = await response.json();
-      if (errorResponse && errorResponse.detail) {
-        Alert.alert("Error", errorResponse.detail);
-      }
-      throw new Error("Failed to create reservation");
+      Alert.alert("You already have a reservation placed for the users selected at this time on another ride.");
     }
 
     const createdReservations = await response.json();

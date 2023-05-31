@@ -80,6 +80,7 @@ const RidesListScreen = ({ navigation }) => {
     }
   };
 
+  //TODO
   const handleAddToVisit = (ride) => {
     if (!visit.find((item) => item.ride_id === ride.ride_id)) {
       setVisit([...visit, ride]);
@@ -88,6 +89,8 @@ const RidesListScreen = ({ navigation }) => {
     }
   };
 
+
+  //TODO
   const handleRemoveFromVisit = (ride) => {
     setVisit(visit.filter((item) => item.ride_id !== ride.ride_id));
   };

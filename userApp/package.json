@@ -19,6 +19,7 @@
     "@react-navigation/stack": "^6.3.16",
     "core-js": "^3.30.2",
     "date-fns": "^2.30.0",
+    "deprecated-react-native-prop-types": "^4.1.0",
     "expo": "~48.0.15",
     "expo-barcode-scanner": "^12.3.2",
     "expo-image-picker": "^14.1.1",
@@ -37,6 +38,7 @@
     "react-native-snackbar": "^2.6.2",
     "react-native-snap-carousel": "^3.9.1",
     "react-native-svg": "13.4.0",
+    "react-native-swipe-gestures": "^1.0.5",
     "react-native-toast-message": "^2.1.6",
     "react-native-vector-icons": "^9.2.0"
   },
