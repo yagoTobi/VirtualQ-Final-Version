@@ -1,0 +1,4 @@
+Pasos a tomar en la instalacion del usuario
+
+1. Te descargas el archivo zip del repositorio de GitHub 
+2. Instalar django 
