@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     "rideApp",
     "restaurantApp",
     "storeApp",
-    "userApp",
+    "userApp-React-Native",
     "ticketApp",
 ]
 
