@@ -5,8 +5,6 @@ import numpy as np
 simulation_time = 480  # in minutes (8 hours)
 
 # Each customer with their arrival time and whether they have a FP or not
-
-
 class Customer:
     def __init__(self, arrival_time, fast_pass=False):
         self.arrival_time = arrival_time
@@ -25,11 +23,11 @@ class Event:
 
 
 def generate_inter_arrival_time():
-    return np.random.exponential(scale=5)
+    return np.random.exponential(scale=3)
 
 
 def generate_service_time():
-    return np.random.uniform(low=5, high=8)
+    return np.random.uniform(low=2, high=5)
 
 
 def generate_customer(arrival_time):

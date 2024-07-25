@@ -55,7 +55,7 @@ class RideReservationViewSet(viewsets.ModelViewSet):
                             {"detail": "The ticket is not valid for this date."}
                         )
 
-                    # 3. Check if a reservation exists within 20 minutes of this reservation #Do not let other reservations at
+                    # 3. Do not let other reservations at
                     # the same time period.
                     start_time = datetime_start.time()
 
