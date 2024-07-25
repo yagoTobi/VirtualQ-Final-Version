@@ -2,7 +2,27 @@
 
 ## Overview
 
-Virtual Q is a comprehensive full-stack ecosystem designed to enhance the experience of both theme park managers and visitors. This project was developed as part of a final thesis in Computer Engineering at Universidad Pontificia Comillas ICAI.
+Virtual Q is a comprehensive full-stack ecosystem designed to enhance the experience of both theme park managers and visitors. This project was developed as part of a final thesis in Computer Engineering at Universidad Pontificia Comillas ICAI. 
+
+- [Project Thesis](https://repositorio.comillas.edu/jspui/bitstream/11531/74763/1/TFG%20Tobio%20Souto%2C%20Yago.pdf)
+- [Project Presentation](https://www.canva.com/design/DAFfNZRYMQI/oRpC6xTuJ5Kh8G46f2VbBg/view?utm_content=DAFfNZRYMQI&utm_campaign=designshare&utm_medium=link&utm_source=publishsharelink)
+
+## Table of Contents
+1. [Overview](#overview)
+2. [Key Features](#key-features)
+   - [Manager Portal](#manager-portal)
+   - [User Mobile App](#user-mobile-app)
+   - [Virtual Queue System](#virtual-queue-system)
+3. [How It Works](#how-it-works)
+4. [Technology Stack](#technology-stack)
+5. [Project Structure](#project-structure)
+6. [Installation and Setup](#installation-and-setup)
+   - [Prerequisites](#prerequisites)
+   - [Manager Portal (Django)](#manager-portal-django)
+   - [User App (React Native)](#user-app-react-native)
+7. [Important Notes](#important-notes)
+8. [Future Development](#future-development)
+9. [Contributing](#contributing)
 
 ## Key Features
 
@@ -25,16 +45,17 @@ Virtual Q is a comprehensive full-stack ecosystem designed to enhance the experi
 - Virtual queue system
 
 #### User Mobile App Preview
-![User App HomeScreen](img_repo/user_app/HomeScreen.png)
-_User App Homescreen modifiable_
 ![User App Reservations Time](img_repo/user_app/reservationsTime.jpg)
-_Reservation times for a ride display_
+*Reservation times for a ride display*
+
 ![User App Ride Under Maintenance](img_repo/user_app/rideUnderMaintenance.jpg)
-_Ride under maintenance set by the park manager in real time_
+*Ride under maintenance set by the park manager in real time*
+
 ![User App Dashboard](img_repo/user_app/userDashboard.jpg)
-_Home Dashboard_
+*Home Dashboard*
+
 ![User App Tickets View](img_repo/user_app/ticketsAppView.jpg)
-_Client tickets view for each specific day and group_
+*Client tickets view for each specific day and group*
 
 ### Virtual Queue System
 - Real-time status updates
@@ -44,19 +65,19 @@ _Client tickets view for each specific day and group_
 ## How It Works
 
 1. **Manager Portal:**
-   - Park managers can access the portal to manage the park's information, including rides, restaurants, and stores.
-   - The portal allows managers to update ride status, capacity, and maintenance information.
-   - Managers can also manage ticket sales and view user tokens.
+   - Park managers access the portal to manage park information, including rides, restaurants, and stores.
+   - Managers can update ride status, capacity, and maintenance information in real-time.
+   - The portal allows for ticket sales management and user token viewing.
 
 2. **User Mobile App:**
-   - Visitors can use the mobile app to purchase tickets, plan itineraries, and book rides.
-   - The app provides real-time information on ride status, queue lengths, and booking availability.
-   - Users can view their ticket information and track their progress throughout the park.
+   - Visitors use the app to purchase tickets, plan itineraries, and book rides.
+   - Real-time information on ride status, queue lengths, and booking availability is provided.
+   - Users can view their ticket information and track their park progress.
 
 3. **Virtual Queue System:**
-   - The system allows users to book ride slots in advance and receive real-time updates on the queue status.
-   - Park managers can view and manage the queue status for multiple rides simultaneously.
-   - Users can enjoy a seamless experience with reduced waiting times and efficient ride booking.
+   - Users can book ride slots in advance and receive real-time queue status updates.
+   - Park managers can simultaneously view and manage queue status for multiple rides.
+   - The system ensures a seamless experience with reduced waiting times and efficient ride booking.
 
 ## Technology Stack
 
@@ -139,9 +160,9 @@ For a detailed view of the class structure and interactions, refer to the follow
 
 This project is a work in progress. Future updates may include:
 - Deployment of the user app to app stores
-- Addition of a map
-- Reorganisation and tidyness of the project
-- Implementation of AI for planned itineraries
+- Addition of an interactive park map
+- Project reorganization and code cleanup
+- Implementation of AI for optimized itinerary planning
 - Enhanced features for both manager and user interfaces
 - Integration with real-time data sources for park information
 
