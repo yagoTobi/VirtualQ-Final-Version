@@ -1,0 +1,137 @@
+# VirtualQ modernization
+
+Baseline: `566cdc5` on `main`. Work branch: `codex/virtualq-modernization`.
+The restored Expo 48 client remains runnable until its replacement passes the
+Android and web foundation gates. Django and its existing model identities stay.
+The historical database is preserved locally; migrations run against the separate
+`db.local.sqlite3`. Never migrate or seed the historical database in place.
+
+## Scope and acceptance gates
+
+| Milestone | Acceptance | Status |
+| --- | --- | --- |
+| Baseline | Clean checkpoint; inventory and plan committed | Recorded |
+| Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | In progress |
+| Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Pending |
+| Operations | All management resources below have authorized search, forms, validation and confirmations | Pending |
+| Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | Pending |
+| Product verification | Browser and Pixel 10 critical-flow walkthrough, mobile/desktop screenshots, build checks | Pending |
+| Delivery | Small commits, reviewable PR, passing CI, setup/architecture/audit/maintenance docs | Pending |
+
+No milestone is complete on build evidence alone when runtime verification is
+required. Physical-device and iOS simulator checks are reported separately.
+
+## Architecture decision
+
+Build the replacement in `frontend/`, with Expo, TypeScript, gluestack v5,
+Tailwind v4 and UniWind. Visitor native/web and staff web share one component and
+token layer. Django remains the API, permissions and persistence boundary.
+Verify exact installed versions before declaring the foundation compatible.
+Remove `userApp-React-Native/` only after functional parity is verified.
+
+UniWind avoids a second CSS pipeline. Native navigation, safe-area/keyboard
+integration, secure credential storage, camera access and QR encoding are
+documented platform exceptions; buttons, forms, cards, dialogs, text, layout and
+feedback use the copied gluestack components. No invented component framework or
+second staff-only UI library.
+
+## Visitor route inventory
+
+| Existing screen/page | Replacement purpose | Required behavior |
+| --- | --- | --- |
+| HomeScreen | Discover | Park summary, real rides, next visit and booking actions |
+| LogInScreen / ticket login | Sign in | Validated credentials, useful failure, authenticated redirect |
+| SignUpScreen | Create account | Validated fields and Django password policy |
+| ResetPasswordRequestScreen | Recover account | Generic response; reset token only in email |
+| Django reset confirm/complete | Set password | Same identity, accessible form/errors and return action |
+| RidesListScreen | Rides | Search, type/area/status filters, loading/error/empty states |
+| SearchScreen | Rides search | Real search results; merged with rides rather than blank destination |
+| RideDetailScreen | Ride details | Local image, hours, height/accessibility, maintenance state |
+| RideReservationScreen | Reserve | Valid ticket date/visitor/available time; server-validated confirmation |
+| ReservationHubScreen | My plans | Chronological reservations, QR and confirmed cancellation |
+| TicketHubScreen | Tickets | Admission codes by date/person, book visit action |
+| Django book_visit | Book visit | Date and party size, atomic ticket creation, explicit reduction rules |
+| TicketScanScreen | Scan ticket | Camera permission/error states and manual code fallback |
+| UserScreen | Account | Profile, group, tickets, plans, sign out, authorized operations link |
+| UserInfoScreen | Profile | Validated update with success/error state |
+| GuestInformationScreen | Group | Own-ticket guest details; no foreign-ticket reassignment |
+
+Unimplemented legacy destinations (`Visit`, `Itinerary`, `MapNavigationScreen`,
+`Shops`, `Restaurants`, `QandA`, location footer) must not remain clickable
+placeholders. Plans replaces itinerary and visit links. Discovery of shops and
+restaurants can use existing catalog data; a geographic map and route planning
+require actual coordinates and remain documented future features.
+
+## UI/component inventory
+
+Legacy: Header, Footer, Banner, PillButton, GridPanel, RideBanner,
+ReservationBanner, SuccessBanner, FilterButton, FilterPanel, FilterModal,
+AccesibilityInfo, DatePicker and DateTimePicker (native/web).
+
+Replace these with shared page/navigation, gluestack Button/Input/FormControl,
+Card, Badge, Select/Checkbox, Alert/Modal, Image, Heading/Text and stack/layout
+primitives. Keep date inputs behind a platform adapter where needed. Consolidate
+the duplicated avatar list into initials until usable avatar assets are supplied.
+Remove external hero dependencies and duplicate hard-coded marketing banners.
+
+Legacy runtime dependency inventory is checkpointed in
+`userApp-React-Native/package.json` and its lockfile: Expo48/RN0.71/React18;
+React Navigation; Paper; Animatable; Modal; swipe gestures; toast; two icon
+families; date-fns; datetimepicker/picker; barcode scanner; QR/SVG; safe area;
+gesture handler/screens; Expo constants; Webpack/RN Web. Replace through the
+new pinned lockfile, then remove the obsolete client and duplicate UI packages.
+Python dependencies are explicitly pinned in `requirements.txt`.
+
+## Operations workflow inventory
+
+| Resource | Existing model/API | Staff workflows |
+| --- | --- | --- |
+| Parks | ThemePark / parkRides | List/search/create/edit/delete with dependency confirmation |
+| Areas | ThemeParkArea / parkRides | Park assignment, list/search/forms |
+| Rides | ThemeParkRide / parkRides | Content/image, area/park, capacity/duration/hours/restrictions/accessibility |
+| Maintenance | ThemeParkRide.under_maintenance | Status filtering and explicit enable/disable |
+| Employees | ParkEmployee / employees | Identity/contact, assignment, role/shift dates and times |
+| Restaurants | Restaurant / restaurants | Content/image, types, opening hours and assignment |
+| Stores | Store / stores | Content/image, opening hours and assignment |
+| Products | Product / stores | Store, content/image and nonnegative decimal price |
+| Tickets | Ticket / tickets | User/date/party position; generated code remains read only |
+| Guests | Guest / tickets | Ticket linkage, name/age/height; generated visit date read only |
+| Reservations | RideReservation / queue | Search/filter, valid booking/edit/cancel and admission validation |
+
+Employee records are not automatically authentication accounts. Django model
+permissions control management access; `is_staff` alone must not authorize every
+mutation. Superusers retain restricted `/admin/` fallback. Normal users may only
+manage their own profile, tickets, guests and reservations. Public catalog reads
+must never imply public writes.
+
+## Audit tracks and verification record
+
+Keep complexity findings in `AUDIT.md`, separate from correctness/security,
+dependency, accessibility and performance evidence. Prioritize:
+
+1. Public catalog writes, staff permissions and ownership on every mutation.
+2. Password reset token disclosure and authentication input validation.
+3. Reservation opening hours, future dates, overlap, capacity and atomic batches.
+4. Guest/ticket date consistency, safe updates, cancellation and QR validation.
+5. Dependency audit, duplicate vendor static files and obsolete/dead code.
+6. Keyboard/focus, contrast, accessible labels, target sizes and responsive states.
+
+Baseline checks: 11 Django tests, system check and no migration drift passed
+during restoration. Browser login, booking, QR were exercised. Pixel 10 loaded
+Expo48 and fetched rides; native login/booking were not exercised. Android/iOS
+JavaScript exports passed; these are not native release builds.
+
+Each subsequent implementation commit updates this record with actual commands,
+results and limitations. Do not represent a pending or manual check as passed.
+
+## Git and data handling
+
+Use descriptive commits on the feature branch, review diffs before staging and
+push without force. Open a PR with test evidence and screenshots, then check CI.
+Keep main releasable and do not merge without the intended review step.
+
+Historical `.env` and `db.sqlite3` were already tracked in baseline history.
+Stop tracking them without deleting local files. This does not remove historical
+copies: the repository owner must rotate exposed credentials and decide on any
+separate history remediation. Do not print credentials or copy private records
+into fixtures, screenshots, docs or new commits.
