@@ -14,7 +14,7 @@ import AuthContext from "../AuthContext";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import GridPanel from "../components/GridPanel";
-import { Icon } from "react-native-elements";
+import Icon from "react-native-vector-icons/FontAwesome";
 
 const UserScreen = ({ navigation }) => {
   const [scrollY, setScrollY] = React.useState(new Animated.Value(0));
@@ -120,7 +120,7 @@ const UserScreen = ({ navigation }) => {
               }
             }}
           >
-            <Icon name="ticket" type="font-awesome" color="#1175c2" />
+            <Icon name="ticket" size={24} color="#1175c2" />
           </TouchableOpacity>
         </ImageBackground>
 

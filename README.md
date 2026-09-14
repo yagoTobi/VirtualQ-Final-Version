@@ -17,9 +17,10 @@ Virtual Q is a comprehensive full-stack ecosystem designed to enhance the experi
 4. [Technology Stack](#technology-stack)
 5. [Project Structure](#project-structure)
 6. [Installation and Setup](#installation-and-setup)
-   - [Prerequisites](#prerequisites)
-   - [Manager Portal (Django)](#manager-portal-django)
-   - [User App (React Native)](#user-app-react-native)
+   - [Run this prepared checkout](#run-this-prepared-checkout)
+   - [Reconstruct from a fresh clone](#reconstruct-from-a-fresh-clone)
+   - [Database and configuration](#database-and-configuration)
+   - [Verify the restoration](#verify-the-restoration)
 7. [Important Notes](#important-notes)
 8. [Future Development](#future-development)
 9. [Contributing](#contributing)
@@ -87,7 +88,7 @@ Virtual Q is a comprehensive full-stack ecosystem designed to enhance the experi
 
 ## Project Structure
 
-Virtual Q follows a microservice-based architecture. The interaction between different components is illustrated in the diagram below:
+This checkout runs as one Django application with domain apps sharing SQLite, plus an Expo mobile client. The original thesis architecture diagram is included below:
 
 ![Microservice Interaction](Diagramas/png/DiagramaInteraccionMicroservicios.png)
 
@@ -97,64 +98,95 @@ For a detailed view of the class structure and interactions, refer to the follow
 
 ## Installation and Setup
 
-### Prerequisites
-- Python 3.10
-- Node.js and npm
-- React Native development environment
-- Django
+The restored local baseline uses Python 3.12, Django 5.2, Node 22, and the original Expo SDK 48 / React Native 0.71 app. See [the audit](AUDIT.md) for the next simplifications.
 
-### Manager Portal (Django)
+### Run this prepared checkout
 
-1. Navigate to the Django project directory:
-   ```
-   cd path/to/django/project
-   ```
+Open two terminals in the repository root:
 
-2. Install required Python packages:
-   ```
-   pip install -r requirements.txt
-   ```
+```sh
+# Terminal 1: Django API, admin, and ticket-booking website
+make backend
+```
 
-3. Run migrations:
-   ```
-   python manage.py migrate
-   ```
+```sh
+# Terminal 2: visitor app in the browser
+make web
+```
 
-4. Create a superuser:
-   ```
-   python manage.py createsuperuser
-   ```
+Open `http://localhost:19006` for the visitor app and `http://localhost:8000/admin/` for management.
 
-5. Start the Django server:
-   ```
-   python manage.py runserver
-   ```
+To use the Android Studio virtual device, start **Pixel 10** in Device Manager, keep `make backend` running, and run `make android` in another terminal. This installs the matching Expo Go runtime if needed, forwards the emulator's API port to Django, and opens the app. Run it in a normal terminal: this older Expo CLI's download progress display fails without a TTY. The default SDK location is `~/Library/Android/sdk`; override `ANDROID_SDK` if yours differs.
 
-6. Access the admin portal at `http://localhost:8000/admin` using the superuser credentials.
+| Account | Username | Initial password |
+| --- | --- | --- |
+| Visitor | `demo` | `VirtualQ-demo-2026!` |
+| Administrator | `demo-admin` | `VirtualQ-demo-2026!` |
 
-### User App (React Native)
+The local runtime copies in `.local/` and `.venv/` are ignored by Git. `make web` prefers the prepared Node 22 copy when present. It disables Metro watching to avoid the `EMFILE` watcher error encountered on this Mac; Webpack still rebuilds browser changes. For native development with live reload, install Watchman and run `npm start` with Node 22.
 
-1. Navigate to the React Native project directory:
-   ```
-   cd path/to/react-native/project
-   ```
+### Reconstruct from a fresh clone
 
-2. Install dependencies:
-   ```
-   npm install
-   ```
+Install Python 3.12 and Node 22 first. The mobile directory includes `.nvmrc` for Node version managers.
 
-3. Start the Expo development server:
-   ```
-   expo start
-   ```
+```sh
+# From the repository root
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python manage.py migrate
+.venv/bin/python manage.py seed_demo
+cd userApp-React-Native
+npm ci
+cd ..
+make backend
+```
 
-4. Use Expo Go on your mobile device to scan the QR code and run the app.
+In another terminal, run `make web`. Use npm and the committed `package-lock.json`; the old Yarn lock has been replaced.
+
+`seed_demo` creates a park, three rides (one under maintenance), a visitor, an administrator, and tickets for tomorrow for the visitor and two guests. It can be rerun each day to add tomorrow's tickets without resetting passwords or deleting existing records. To create your own administrator, run `.venv/bin/python manage.py createsuperuser`.
+
+### Database and configuration
+
+The default database is **`db.local.sqlite3`**, created by migrations. The historical **`db.sqlite3`** remains untouched. To explore historical data, copy it to a separate file and set `DJANGO_DATABASE_PATH` to that copy before migrating it. Demo seeding is optional when using historical data.
+
+No email credentials are required: password-reset email is printed in the Django terminal. The historical `.env` is not loaded. Optional overrides go in `.env.local`:
+
+```sh
+cp .env.example .env.local
+```
+
+The API address defaults to the browser hostname or the Expo development host on native. To override it, restart Expo with:
+
+```sh
+cd userApp-React-Native
+VIRTUALQ_API_URL=http://192.168.1.50:8000 npm start
+```
+
+For a physical device, put the computer and device on the same network, add the computer's LAN IP to `DJANGO_ALLOWED_HOSTS` in `.env.local`, and run Django with `.venv/bin/python manage.py runserver 0.0.0.0:8000`. Browser clients on another origin also need that origin in `CORS_ALLOWED_ORIGINS`.
+
+Expo Go must match SDK 48. Older Expo Go builds are available for Android and iOS Simulator; SDK 48 cannot use today's App Store Expo Go on a physical iPhone. A physical iPhone needs an SDK upgrade or a compatible development build. Expo Go installation and native app launch were verified on the existing Pixel 10 Android emulator, with ride/API requests and local thumbnails served by Django during that session. Native login/booking interactions, camera scanning, and physical-device installation remain unverified.
+
+### Verify the restoration
+
+```sh
+make check
+cd userApp-React-Native
+npm run build:web
+npx expo export --platform android
+npx expo export --platform ios
+```
+
+`make check` runs Django's system check, migration-drift check, and 11 regression tests. The tests cover account creation/login/profile/reset email, repeatable seeding, web ticket booking, reservation creation/listing/cancellation, invalid-batch rollback, maintenance/date rejection, ticket validation, and ownership isolation for the touched endpoints.
+
+Browser walkthrough: log in as `demo` → ride-list icon → Python Plunge → book a spot → choose tomorrow and visitors → Confirm → profile icon → My Virtual Q Ride Reservations. The ticket icon on the profile screen opens the admission-ticket QR list. The ticket-booking website is at `http://localhost:8000/api/tickets/login/`.
 
 ## Important Notes
 
-- Ensure both the Django backend and React Native app are running simultaneously for full functionality.
-- Check and update IP configurations in the app settings for local connections.
+- This is a restored local prototype. Search, map, itinerary, several profile menu destinations, and the mobile cancellation handler still contain placeholders. They are not completed by this setup repair.
+- Capacity enforcement, overlapping reservations, and validation on reservation edits need a separate correctness review before real park use.
+- The original avatar image files under `ticketApp/profile_icons/` are missing; avatar selection remains incomplete. Existing ride thumbnails are available locally; the home/profile hero image still uses an external URL.
+- Authentication currently lives in memory, so a full browser reload requires logging in again.
+- Expo SDK 48 has deprecated transitive packages. The web build currently reports an optional Reanimated import and bundle-size warnings. Upgrade Expo as the next compatibility project, using this restored baseline to compare behavior.
 
 ## Future Development
 

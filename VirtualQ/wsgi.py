@@ -1,5 +1,5 @@
 """
-WSGI config for VirtualQ project.
+WSGI config for the VirtualQ project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 

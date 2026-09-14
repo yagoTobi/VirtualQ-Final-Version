@@ -59,7 +59,7 @@ const TicketScanScreen = ({ navigation }) => {
     setScanned(true);
     console.log(data);
     // Make a POST request to your TicketValidationView
-    const response = await fetch(`${API_BASE_URL}/api/tickets/validate/`, {
+    const response = await fetch(`${API_BASE_URL}/api/tickets/tickets/validate/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -67,7 +67,6 @@ const TicketScanScreen = ({ navigation }) => {
       },
       body: JSON.stringify({
         ticket_id: data,
-        user: user,
       }),
     });
 
@@ -76,7 +75,7 @@ const TicketScanScreen = ({ navigation }) => {
     if (response.ok) {
       alert(`Ticket is valid!`);
     } else {
-      alert(`Invalid ticket: ${responseData.message}`);
+      alert(`Invalid ticket: ${responseData.detail || "Ticket could not be validated"}`);
     }
   };
 

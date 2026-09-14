@@ -1,5 +1,6 @@
 from django.test import TestCase, Client
 from django.urls import reverse
+from django.test import override_settings
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from datetime import date
@@ -29,11 +30,13 @@ class UserTest(TestCase):
         response = self.client.post(reverse("signup"), user_data)
         self.assertEqual(response.status_code, 201)
         self.assertTrue(CustomUser.objects.filter(username="testuser").exists())
+        self.assertEqual(CustomUser.objects.get(username="testuser").name, "Test")
 
     def test_login_user(self):
         login_data = {"username": "user1", "password": "pass"}
         response = self.client.post(reverse("login"), login_data)
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("token", response.json())
 
     def test_get_user_info(self):
         self.api_client.force_authenticate(user=self.user1)
@@ -54,6 +57,7 @@ class UserTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.data["name"], "User1Updated")
 
+    @override_settings(EMAIL_BACKEND="django.core.mail.backends.locmem.EmailBackend")
     def test_reset_password(self):
         response = self.client.post(
             reverse("resetpassword"), {"email": "user1@test.com"}

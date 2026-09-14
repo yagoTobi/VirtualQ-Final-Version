@@ -6,7 +6,7 @@ import {
   StyleSheet,
   Platform,
 } from "react-native";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker from "./DateTimePicker";
 
 export default function DatePicker({ onDateSelected }) {
   const [show, setShow] = useState(false);

@@ -1,9 +1,8 @@
 // AppNavigator.js
-import React, { useEffect } from "react";
+import React from "react";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import { LogBox } from "react-native";
-import * as Notifications from "expo-notifications";
 
 LogBox.ignoreLogs([
   "Non-serializable values were found in the navigation state",
@@ -27,28 +26,10 @@ import ReservationHubScreen from "./ReservationHubScreen.js";
 const Stack = createStackNavigator();
 
 const AppNavigator = () => {
-  useEffect(() => {
-    // This function asks for permission to send notifications.
-    const askForPermission = async () => {
-      const { status: existingStatus } =
-        await Notifications.getPermissionsAsync();
-      let finalStatus = existingStatus;
-      if (existingStatus !== "granted") {
-        const { status } = await Notifications.requestPermissionsAsync();
-        finalStatus = status;
-      }
-      if (finalStatus !== "granted") {
-        return;
-      }
-      const token = (await Notifications.getExpoPushTokenAsync()).data;
-    };
-    askForPermission();
-  }, []);
-
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Home"
+        initialRouteName="HomeScreen"
         screenOptions={{ headerShown: false, animationEnabled: false }}
       >
         <Stack.Screen name="HomeScreen" component={HomeScreen} />

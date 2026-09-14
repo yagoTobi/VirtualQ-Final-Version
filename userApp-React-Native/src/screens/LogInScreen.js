@@ -15,7 +15,6 @@ import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthContext from "../AuthContext";
 import SuccessBanner from "../components/SuccessBanner";
-import { Input } from "react-native-elements";
 import Icon from "react-native-vector-icons/FontAwesome";
 
 async function loginUser(username, password) {
@@ -95,13 +94,17 @@ export default function LogInScreen({ navigation }) {
               onChangeText={(text) => setUsername(text)}
             />
             {/* Password placeholder */}
-            <Input
-              placeholder="Password"
-              secureTextEntry={passwordVisibility}
-              value={password}
-              onChangeText={(text) => setPassword(text)}
-              rightIcon={
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <TextInput
+                style={[styles.input, { flex: 1 }]}
+                placeholder="Password"
+                secureTextEntry={passwordVisibility}
+                value={password}
+                onChangeText={setPassword}
+              />
                 <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel={passwordVisibility ? "Show password" : "Hide password"}
                   onPress={() => setPasswordVisibility(!passwordVisibility)}
                 >
                   <Icon
@@ -110,8 +113,7 @@ export default function LogInScreen({ navigation }) {
                     color="black"
                   />
                 </TouchableOpacity>
-              }
-            />
+            </View>
 
             <TouchableOpacity
               style={styles.loginButton}

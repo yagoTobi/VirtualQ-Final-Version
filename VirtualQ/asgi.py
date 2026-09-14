@@ -1,5 +1,5 @@
 """
-ASGI config for VirtualQ project.
+ASGI config for the VirtualQ project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 

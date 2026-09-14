@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create(
             username=validated_data["username"],
             email=validated_data["email"],
-            name=validated_data.get("first_name", ""),
+            name=validated_data.get("name", ""),
             last_name=validated_data.get("last_name", ""),
             dob=validated_data["dob"],
         )

@@ -1,7 +1,6 @@
 import qrcode
 import io
 import base64
-import hashlib
 from rest_framework import generics, viewsets
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -47,24 +46,10 @@ class TicketValidationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        ticket_id = request.data.get("ticket_id")  # this comes from the scanned QR code
-        user = request.data.get(
-            "user"
-        )  # this should come from the user's information, not the QR code
-
-        # Look up the ticket in the database
-        try:
-            ticket = Ticket.objects.get(user=user)
-        except Ticket.DoesNotExist:
-            raise ValidationError("Ticket does not exist")
-
-        # Recreate the hash
-        msg = f"{ticket.salt}_{user}_{ticket.date_of_visit}_{ticket.additional_guests}"
-        expected_ticket_id = hashlib.sha256(msg.encode()).hexdigest()
-
-        if expected_ticket_id != ticket_id:
-            raise ValidationError("Invalid ticket")
-
+        if not Ticket.objects.filter(
+            user=request.user, ticket_id=request.data.get("ticket_id")
+        ).exists():
+            raise ValidationError({"detail": "Invalid ticket"})
         return Response({"message": "Ticket is valid"})
 
 
@@ -156,7 +141,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect("login_view")
+    return redirect("ticket_login")
 
 
 class UserTicketsListAPIView(generics.ListAPIView):
@@ -178,13 +163,16 @@ class GuestViewSet(viewsets.ModelViewSet):
     queryset = Guest.objects.all()
     serializer_class = GuestSerializer
 
+    def get_queryset(self):
+        return super().get_queryset().filter(ticket__user=self.request.user)
+
 
 @api_view(["GET"])
 def get_guest_by_ticket(request):
     ticket_id = request.GET.get("ticket_id", None)
     if ticket_id is not None:
         try:
-            guest = Guest.objects.get(ticket__id=ticket_id)
+            guest = Guest.objects.get(ticket__id=ticket_id, ticket__user=request.user)
             serializer = GuestSerializer(guest)
             return Response(serializer.data)
         except ObjectDoesNotExist:

@@ -10,20 +10,17 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import Modal from "react-native-modal";
-import Carousel from "react-native-snap-carousel";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import ReservationBanner from "../components/ReservationBanner";
 import AuthContext from "../AuthContext";
 import { API_BASE_URL } from "../constants";
-import { Pagination } from "react-native-snap-carousel";
 import { format } from "date-fns";
 
 const ReservationHubScreen = ({ navigation }) => {
   const { token } = useContext(AuthContext);
   const [reservations, setReservations] = useState([]);
   const [selectedReservations, setSelectedReservations] = useState(null);
-  const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
     fetchReservations();
@@ -95,7 +92,7 @@ const ReservationHubScreen = ({ navigation }) => {
             key={reservation.reservation_id}
             reservation={reservation}
             onCancel={handleCancelReservation}
-            onPress={() => handleReservationPress(reservation)}
+            onPress={() => handleReservationPress(reservations)}
           />
         ))}
       </View>
@@ -118,16 +115,12 @@ const ReservationHubScreen = ({ navigation }) => {
         onBackdropPress={handleModalClose}
         style={styles.modal}
       >
-        <Carousel
+        <FlatList
+          horizontal
+          pagingEnabled
           data={selectedReservations}
           renderItem={renderCarouselItem}
-          sliderWidth={Dimensions.get("window").width}
-          itemWidth={Dimensions.get("window").width}
-          onSnapToItem={(index) => setActiveSlide(index)}
-        />
-        <Pagination
-          dotsLength={selectedReservations?.length}
-          activeDotIndex={activeSlide}
+          keyExtractor={(item) => String(item.reservation_id)}
         />
       </Modal>
     </View>
@@ -169,6 +162,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   carouselItem: {
+    width: Dimensions.get("window").width,
     alignItems: "center",
     padding: 20,
   },
@@ -184,7 +178,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     margin: 0,
     backgroundColor: "white",
-    marginTop: "60%", // Push modal further down the screen
+    marginTop: Math.max(0, Dimensions.get("window").height - 360),
     borderRadius: 15, // Adds rounded corners
     overflow: "hidden", // Ensures the rounded corners are visible
   },

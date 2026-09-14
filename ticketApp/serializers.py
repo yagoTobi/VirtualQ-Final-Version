@@ -16,6 +16,11 @@ class TicketSerializer(serializers.ModelSerializer):
 
 
 class GuestSerializer(serializers.ModelSerializer):
+    def validate_ticket(self, ticket):
+        if ticket.user_id != self.context["request"].user.pk:
+            raise serializers.ValidationError("Choose one of your own tickets.")
+        return ticket
+
     class Meta:
         model = Guest
         fields = "__all__"

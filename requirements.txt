@@ -1,0 +1,10 @@
+# Verified with Python 3.12; includes transitive dependencies for repeatable installs.
+asgiref==3.12.1
+Django==5.2.17
+django-cors-headers==4.9.0
+django-filter==26.1
+djangorestframework==3.18.1
+Pillow==12.3.0
+python-dotenv==1.2.3
+qrcode==8.2
+sqlparse==0.6.0

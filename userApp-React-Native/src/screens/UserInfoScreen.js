@@ -15,7 +15,7 @@ import AuthContext from "../AuthContext";
 import SuccessBanner from "../components/SuccessBanner";
 import { API_BASE_URL } from "../constants";
 import { ScrollView } from "react-native-gesture-handler";
-import DateTimePicker from "@react-native-community/datetimepicker";
+import DateTimePicker from "../components/DateTimePicker";
 
 const UserInfoScreen = ({ navigation }) => {
   const [isEditing, setIsEditing] = useState(false);

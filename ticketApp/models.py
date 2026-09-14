@@ -13,7 +13,7 @@ class Ticket(models.Model):
     ticket_id = models.CharField(max_length=200, editable=False)  # Relational target
 
     def _generate_ticket(self, guest_number):
-        guest_number_str = str(guest_number) if guest_number is not 0 else "0"
+        guest_number_str = str(guest_number)
         data = f"{self.user.email}_{self.date_of_visit}_{guest_number_str}"
         random_secret = get_random_string(12)
         return base64.urlsafe_b64encode(
@@ -25,8 +25,8 @@ class Ticket(models.Model):
             self.ticket_id = self._generate_ticket(self.guest_number)
         super().save(*args, **kwargs)
         # Create guest if guest_number > 0
-        if self.guest_number > 0:
-            Guest.objects.create(ticket=self)
+        if self.guest_number and self.guest_number > 0:
+            Guest.objects.get_or_create(ticket=self)
 
 
 class Guest(models.Model):

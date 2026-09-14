@@ -1,0 +1,8 @@
+.venv/
+.local/
+__pycache__/
+*.py[cod]
+.env.local
+db.local.sqlite3*
+.DS_Store
+staticfiles/

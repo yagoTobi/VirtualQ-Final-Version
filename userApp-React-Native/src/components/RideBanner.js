@@ -109,6 +109,7 @@ const RideBanner = ({
 
             <View style={styles.buttonContainer}>
               <Button
+                disabled={!handleAddToVisit || !handleRemoveFromVisit}
                 title={
                   addedToVisit ? "Remove from My Visit" : "Add to My Visit"
                 }

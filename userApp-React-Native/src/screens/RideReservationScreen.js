@@ -131,7 +131,7 @@ const RideReservationScreen = ({ route, navigation }) => {
 
       const guestData = await guestResponse.json();
       const userData = {
-        guest_id: userResponse.id, //assuming there is an id field, adjust this if needed
+        guest_id: `user-${userResponse.id}`,
         name: userResponse.name, // use your user's name here
       };
 
@@ -146,6 +146,7 @@ const RideReservationScreen = ({ route, navigation }) => {
       sortedDates.sort((a, b) => new Date(a) - new Date(b)); // Sort the dates in ascending order
       setDates(sortedDates);
       setGuests(groupedData);
+      if (sortedDates.length) setSelectedDate(parseISO(sortedDates[0]));
       setLoading(false);
     } catch (error) {
       console.error("fetchGuests failed:", error);
@@ -280,7 +281,7 @@ const RideReservationScreen = ({ route, navigation }) => {
       let newReservations = [];
       for (let i = 0; i < selectedGuests.length; i++) {
         let ticketId =
-          selectedGuests[i] === user.id
+            selectedGuests[i] === `user-${user.id}`
             ? unassignedTicket
             : ticketsGuestsMap[selectedGuests[i]];
         console.log(`Ticket ID for guest ${selectedGuests[i]}:`, ticketId);
@@ -339,7 +340,9 @@ const RideReservationScreen = ({ route, navigation }) => {
     });
 
     if (!response.ok) {
-      Alert.alert("You already have a reservation placed for the users selected at this time on another ride.");
+      const error = await response.json();
+      Toast.show({ type: "error", text1: error.detail || "Reservation could not be created." });
+      throw new Error(error.detail || "Reservation could not be created.");
     }
 
     const createdReservations = await response.json();
@@ -440,7 +443,7 @@ const RideReservationScreen = ({ route, navigation }) => {
         {/* Footer */}
         <Footer navigation={navigation} />
       </SafeAreaView>
-      <Toast ref={(ref) => Toast.setRef(ref)} />
+      <Toast />
     </>
   );
 };

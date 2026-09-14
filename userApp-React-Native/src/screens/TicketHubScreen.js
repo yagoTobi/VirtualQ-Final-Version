@@ -10,20 +10,17 @@ import {
 } from "react-native";
 import QRCode from "react-native-qrcode-svg";
 import Modal from "react-native-modal";
-import Carousel from "react-native-snap-carousel";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import AuthContext from "../AuthContext";
 import { API_BASE_URL } from "../constants";
 import { Ionicons } from "@expo/vector-icons";
-import { Pagination } from "react-native-snap-carousel";
 import { format } from "date-fns";
 
 const TicketHubScreen = ({ navigation }) => {
   const { token } = useContext(AuthContext);
   const [tickets, setTickets] = useState([]);
   const [selectedTickets, setSelectedTickets] = useState(null);
-  const [activeSlide, setActiveSlide] = useState(0);
 
   useEffect(() => {
     fetchTickets();
@@ -140,21 +137,13 @@ const TicketHubScreen = ({ navigation }) => {
         </TouchableOpacity>
         {selectedTickets && (
           <>
-            <Carousel
+            <FlatList
+              horizontal
+              pagingEnabled
               data={selectedTickets}
               renderItem={renderCarouselItem}
-              sliderWidth={Dimensions.get("window").width}
-              itemWidth={Dimensions.get("window").width}
-              onSnapToItem={(index) => setActiveSlide(index)}
-              containerCustomStyle={styles.carouselContainer}
-            />
-            <Pagination
-              dotsLength={selectedTickets.length}
-              activeDotIndex={activeSlide}
-              containerStyle={styles.paginationContainer}
-              dotStyle={styles.paginationDot}
-              inactiveDotOpacity={0.4}
-              inactiveDotScale={0.6}
+              keyExtractor={(item) => String(item.id)}
+              style={styles.carouselContainer}
             />
           </>
         )}
@@ -214,6 +203,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   carouselItem: {
+    width: Dimensions.get("window").width,
     alignItems: "center",
     padding: 20,
   },
@@ -244,7 +234,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     margin: 0,
     backgroundColor: "white",
-    marginTop: "95%", // Push modal further down the screen
+    marginTop: Math.max(0, Dimensions.get("window").height - 360),
     borderRadius: 15, // Adds rounded corners
     overflow: "hidden", // Ensures the rounded corners are visible
   },
