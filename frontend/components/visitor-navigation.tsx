@@ -42,6 +42,7 @@ const visitorTabs = [
 const screenTitles: Record<string, string> = {
   index: "Explore",
   map: "Park map",
+  "map-rides": "Park rides",
   plans: "Plans",
   tickets: "Tickets",
   account: "You",
@@ -159,9 +160,16 @@ function VisitorTabBar({ state, navigation }: TabBarProps) {
                 <Text
                   size="xs"
                   bold={active}
+                  // Fixed-width navigation labels must fit the smallest phone.
+                  // Full screen content retains the user's font scaling.
+                  {...(Platform.OS === "web"
+                    ? {}
+                    : { numberOfLines: 1, maxFontSizeMultiplier: 1.2 })}
                   className={active ? "text-primary" : "text-muted-foreground"}
                 >
-                  {tab.label}
+                  {Platform.OS !== "web" && tab.name === "(map)"
+                    ? "Map"
+                    : tab.label}
                 </Text>
               </Pressable>
             );

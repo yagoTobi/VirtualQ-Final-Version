@@ -1,5 +1,6 @@
 import { router, useFocusEffect } from "expo-router";
 import { useCallback, useState } from "react";
+import { Platform } from "react-native";
 import { Box } from "@/components/ui/box";
 import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
@@ -64,7 +65,8 @@ export function NextPlan({
           <Text
             bold
             size="sm"
-            numberOfLines={1}
+            isTruncated
+            {...(Platform.OS === "web" ? {} : { numberOfLines: 1 })}
             className="text-hero-foreground"
           >
             Next · {next.ride_name}
