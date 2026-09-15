@@ -88,6 +88,9 @@ class OperationsViewSet(PrivateResponseMixin, SafeDestroyMixin, viewsets.ModelVi
                 )
             if field.default is not serializers.empty and not callable(field.default):
                 fields[name]["default"] = field.default
+        # Choose a location from the top of the hierarchy before its details.
+        parent_order = {"parks": 0, "areas": 1, "stores": 2}
+        fields = dict(sorted(fields.items(), key=lambda item: parent_order.get(item[1].get("resource"), 3)))
         return Response({
             "id_field": self.queryset.model._meta.pk.name,
             "fields": fields, "columns": self.columns,

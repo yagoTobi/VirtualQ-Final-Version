@@ -72,6 +72,7 @@ class OperationsTest(TestCase):
             self.assertTrue(response.data["fields"][response.data["id_field"]]["read_only"])
         schema = self.api.get("/api/operations/rides/schema/").data
         self.assertEqual(schema["fields"]["park_id"]["resource"], "parks")
+        self.assertEqual(list(schema["fields"])[:2], ["park_id", "area_id"])
         self.assertTrue(schema["fields"]["ride_description"]["multiline"])
         self.assertTrue(schema["fields"]["ride_type"]["choices"])
         self.assertFalse(self.api.get("/api/operations/visitors/schema/").data["permissions"]["change"])
