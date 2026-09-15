@@ -117,3 +117,20 @@ With React DevTools attached, Android’s transition animation scale was changed
 from 1.0 to 0. The mounted VisitorStack’s reduced-motion context changed from
 false to true, then back to false after restoring 1.0. App preferences follow the
 OS without reloading. iOS/browser runtime preference checks remain outstanding.
+
+## Operations export checkpoint — 15 September 2026
+
+The staff workspace uses server-side search and 25-row pages (100 maximum).
+Related-name fields use joined queries in the catalog endpoints. The browser
+implementation is selected through `.web.tsx` modules; native operations routes
+return to the visitor app.
+
+The combined export produced 75 static entries including route-group aliases,
+approximately 2 MB main web JavaScript plus 45 KB additional JS and 47 KB CSS,
+and 3.8/3.4 MB Android/iOS Hermes bundles. The previous navigation checkpoint
+was 1.8 MB main web JS and 3.7/3.4 MB Hermes. These are rounded build output sizes,
+not startup-time, memory, FPS or native installation measurements.
+
+The Pixel regression kept the 16 September party selection across Map/Tickets
+and the visitor chrome remained in place. This check does not replace the
+navigation measurements above or establish release performance.

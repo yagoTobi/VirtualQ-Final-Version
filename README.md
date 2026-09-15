@@ -32,15 +32,17 @@ Virtual Q is a comprehensive full-stack ecosystem designed to enhance the experi
 - Control over ride information, status, and capacity
 - Restaurant and store product management
 - Ticket administration
-- Map information updates
+- Park and area organization
 
 #### Manager Portal Preview
-![Manager Dashboard Home View](img_repo/manager_dashboard/DashboardHomeView.png)
-![Manager Editable Fields](img_repo/manager_dashboard/EditableFields.png)
-![Manager User Tokens](img_repo/manager_dashboard/UserTokens.png)
+![Staff workspace](docs/verification/web-operations-overview.png)
+![Ride management](docs/verification/web-operations-rides.png)
+
+The custom web workspace is at `/operations` in the modern frontend. Django
+admin remains a restricted fallback while the remaining workflows are verified.
 
 ### User Mobile App
-- Ticket purchasing
+- Visit booking and park passes
 - Itinerary planning
 - Advance ride booking
 - Virtual queue system
@@ -68,10 +70,11 @@ Virtual Q is a comprehensive full-stack ecosystem designed to enhance the experi
 1. **Manager Portal:**
    - Park managers access the portal to manage park information, including rides, restaurants, and stores.
    - Managers can update ride status, capacity, and maintenance information in real-time.
-   - The portal allows for ticket sales management and user token viewing.
+   - Staff can manage visit tickets and look up visitor accounts according to
+     their Django model permissions.
 
 2. **User Mobile App:**
-   - Visitors use the app to purchase tickets, plan itineraries, and book rides.
+   - Visitors use the app to book visits, plan itineraries, and reserve rides.
    - Real-time information on ride status, queue lengths, and booking availability is provided.
    - Users can view their ticket information and track their park progress.
 
@@ -83,7 +86,8 @@ Virtual Q is a comprehensive full-stack ecosystem designed to enhance the experi
 ## Technology Stack
 
 - **User Mobile App:** React Native
-- **Backend & Manager Portal:** Django
+- **Backend:** Django / Django REST Framework
+- **Staff Web Portal:** Expo Router web / gluestack v5
 - **Database:** SQLite
 
 ## Project Structure
@@ -101,9 +105,11 @@ For a detailed view of the class structure and interactions, refer to the follow
 The migration lives in `frontend/`: Expo 57, React Native 0.86 and gluestack v5.
 It currently includes phone-first Explore/search, ride details, a provisional map,
 registration/sign-in/reset requests, profile editing, visit booking, ticket QR
-passes and guest details. Secure native sessions survive restarts. Ride
-reservations, scanning, remaining visitor flows and the custom staff portal are
-still being migrated. See
+passes, guest details, group ride reservations, cancellation and ticket scanning.
+Native tabs retain their screens, dates and passes, and secure sessions survive
+restarts. The staff workspace now covers the management resources with
+permission-aware APIs and forms. Its full browser walkthrough and the existing
+Django booking/reset pages remain in progress. See
 [the plan](docs/MODERNIZATION.md) and [native evidence](docs/VERIFICATION.md).
 
 With Python 3.12 and Node 22 installed:
@@ -127,6 +133,28 @@ localhost; an IPv6-only Metro listener failed the emulator's IPv4 connection.
 For a LAN device,
 set `EXPO_PUBLIC_API_URL` and configure Django's hosts/bind address as described
 below. `CI=1` disables Metro watching on this Mac; restart after source edits.
+
+### Staff workspace
+
+With the modern frontend and backend running, open
+`http://localhost:8081/operations`. The local `seed_demo` command provides the
+existing `demo-admin` staff account; its documented demo password is
+`VirtualQ-demo-2026!`. The native visitor app keeps its own phone navigation.
+
+The workspace covers parks, areas, rides/maintenance, restaurants, stores,
+products, employees, tickets, guests and reservations, plus read-only visitor
+account lookup. Search, filters and pagination run on the server. Access requires
+staff status and the relevant Django **view/add/change/delete** model permissions.
+Account lookup requires `clientApp.view_customuser`; creating a guest ticket also
+requires `ticketApp.add_guest`. Employee records do not grant login access.
+Use the existing Django admin to maintain accounts, groups and permissions.
+
+Existing ticket owners and party positions are fixed. A visit date cannot change
+while the ticket has ride reservations. Remove a guest through the associated
+ticket so the party and reservations stay consistent. Admission is a separate,
+permission-checked action during the booked time window. Deleting a parent
+requires permission for every affected model and confirmation of related records;
+admitted/completed reservation history is preserved.
 
 Run `make check` and `make frontend-check`. To include the SQLite concurrency
 cases, use a disposable test database path:

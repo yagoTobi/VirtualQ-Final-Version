@@ -89,8 +89,9 @@ still need their own verification.
 
 ## Still open
 
-- Staff ticket management/admission needs its own permission, date and atomic
-  transition tests. Visitor cancellation now rejects admitted or finished bookings.
+- Staff ticket/admission API permissions and atomic transitions are covered by
+  the operations tests below. The complete browser admission workflow and
+  row-locking database behavior remain to be verified.
 - Tokens are long-lived and logout revokes all sessions sharing that user's token.
   Native SecureStore persistence is verified on Pixel 10; the web uses tab-lifetime
   sessionStorage. These do not change the server token's lifetime.
@@ -147,6 +148,32 @@ database, with no system-check errors or migration drift. The new regression
 cases cover privilege escalation, partial edits, dependent-model deletion and
 admitted history. The custom staff portal and its runtime walkthrough remain in
 progress.
+
+## Staff operations APIs
+
+`/api/operations/` exposes only resources the staff member can view. Resource
+lists, details and schemas require the matching model permission and return
+`private, no-store`. Lists use bounded pagination and server-side search/filters.
+Visitor account lookup is read only; neither the profile nor the portal grants
+staff roles. Existing Django admin remains the account/group management fallback.
+
+Staff ticket writes lock the account and ticket, reject duplicate party positions,
+preserve owner/position and ticket codes, keep guest dates synchronized and reject
+date changes while ride reservations exist. Creating a guest ticket also requires
+guest-add permission. Guest removal goes through its ticket.
+
+Reservation creation/rescheduling reuse the existing model rules. Admission is a
+separate change-permission action with ticket → ride → reservation locking. It
+checks today's visit, the complete booked time window, maintenance and recorded
+height; repeated admission is idempotent. Admitted/completed reservations block
+deletion, including deletion through a parent catalog record.
+
+Regression coverage includes 54 backend tests on disposable file-backed SQLite:
+permissions, metadata, search/filter/pagination, ticket identities/dates/codes,
+guest cascades, image upload and nullable employee contacts, plus concurrent
+admission. The final targeted catalog/operations run also passes after fresh-row
+lookups were changed to return 404 when a concurrently removed record is missing.
+No schema migration or historical database change is required.
 
 ## Frontend dependency review — 15 September 2026
 

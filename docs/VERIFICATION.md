@@ -274,10 +274,61 @@ Android/iOS Hermes exports remain 3.7/3.4 MB. CI rechecks the final committed tr
 No release FPS, physical-device, iOS runtime or desktop interaction result is
 inferred from these checks.
 
+## Staff workspace and Android regression — 15 September 2026
+
+The web-only `/operations` layout covers ten managed resources and read-only
+visitor account lookup. It uses the shared gluestack cards, inputs, buttons,
+checkboxes, selectors and modal API. Browser date/time/file controls and semantic
+table elements are intentional web primitives. The visitor app's native routes,
+five bottom tabs, Explore panels, provisional map and next-plan banner remain.
+
+Safari walkthrough, using only the synthetic demo staff account:
+
+- Staff sign-in and restored browser session; sidebar, overview and ride table
+  rendered with the shared colors and spacing.
+- Empty park submission showed server validation at the form and field.
+- A draft survived Cancel → Keep editing. Saving added the record, updated the
+  table/count and closed the dialog. The two synthetic parks were then removed
+  through the staff API after checking that neither had related records.
+- The long ride form scrolled within its dialog while keeping actions visible.
+  The ride-type selector exposed the model choices. Nested park/area search used
+  the staff session; an area result displayed **Technology Land**, not its parent
+  park's name.
+
+These checks found and fixed three integration defects: the desktop Box inherited
+a column layout, Reanimated exit views left a completed dialog on screen, and
+the overlay host sat outside the auth provider. The web modal now closes without
+an exiting animated view, and auth wraps the gluestack overlay host.
+
+![Operations overview](verification/web-operations-overview.png)
+![Ride management](verification/web-operations-rides.png)
+![Authenticated area picker](verification/web-operations-picker.png)
+
+The Pixel 10 / Expo Go regression restored the existing native session and
+rendered Explore with its bottom controls. The 16 September ticket deep link
+showed the holder and two guest passes; Tickets → Map → Tickets retained the date
+and group. Lost ADB reverse mappings initially prevented Expo from reaching
+Metro; restoring ports 8000 and 8081 resolved that environment issue.
+
+![Phone regression](verification/android-operations-regression.png)
+
+Validation: 54 backend tests using disposable file-backed SQLite, six frontend
+tests, type checking, lint, Expo alignment and the high-severity audit gate pass.
+The audit still reports three moderate frontend findings. Web and Android/iOS
+JavaScript exports pass; CI repeats the checks on the committed branch.
+
+This is a staff preview checkpoint, not complete browser or accessibility
+coverage. The computer-use bridge exposed table rows as cells and returned
+`noWindowsAvailable` for coordinate actions, so row-edit/delete/admission
+interaction checks remain pending; their API rules are covered by regression
+tests. Full image-upload forms, narrower browser layouts and all role-specific
+screens also need a browser pass. No physical device, native release binary,
+iOS runtime, production deployment or release performance result is inferred.
+
 ## Checks still required
 
-Reset confirmation and staff CRUD need migration and runtime
-checks. Existing Django booking/authentication pages still need their shared
+Reset confirmation needs migration and runtime checks. Staff CRUD is implemented
+with the remaining browser coverage listed above. Existing Django booking/authentication pages still need their shared
 visual treatment. Visitor forms need a desktop web walkthrough. Additional
 large-font, screen-reader, smaller-phone and long-history checks remain.
 Avatar selection is intentionally consolidated into initials until usable assets
