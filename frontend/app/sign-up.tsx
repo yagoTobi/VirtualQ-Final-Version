@@ -1,0 +1,199 @@
+import { useRef, useState } from "react";
+import type { TextInput } from "react-native";
+import { router } from "expo-router";
+import { Page } from "@/components/page";
+import { Field } from "@/components/field";
+import { ErrorMessage } from "@/components/feedback";
+import { Card } from "@/components/ui/card";
+import { VStack } from "@/components/ui/vstack";
+import { Heading } from "@/components/ui/heading";
+import { Text } from "@/components/ui/text";
+import { Button, ButtonText, ButtonSpinner } from "@/components/ui/button";
+import { api } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
+
+export default function SignUp() {
+  const { signIn } = useAuth();
+  const fields = useRef<(TextInput | null)[]>([]);
+  const [form, setForm] = useState({
+    name: "",
+    last_name: "",
+    username: "",
+    email: "",
+    password: "",
+    height: "",
+  });
+  const [confirmation, setConfirmation] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<unknown>(null);
+  const change = (field: keyof typeof form) => (value: string) =>
+    setForm((current) => ({ ...current, [field]: value }));
+
+  async function submit() {
+    if (busy) return;
+    if (form.password !== confirmation) {
+      setError(new Error("The passwords do not match."));
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const { token } = await api<{ token: string }>(
+        "/api/clients/signup/",
+        null,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            ...form,
+            name: form.name.trim(),
+            last_name: form.last_name.trim(),
+            username: form.username.trim(),
+            email: form.email.trim(),
+            height: form.height || null,
+          }),
+        },
+      );
+      await signIn(token);
+      router.replace("/account");
+    } catch (err) {
+      setError(err);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <Page>
+      <Card size="sm" className="w-full max-w-lg self-center p-5 md:p-8">
+        <VStack space="sm">
+          <Heading size="2xl">Your next park day.</Heading>
+          <Text className="text-muted-foreground">
+            Create an account to keep your tickets and plans together.
+          </Text>
+        </VStack>
+        <Field
+          label="First name"
+          ref={(field) => {
+            fields.current[0] = field;
+          }}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => fields.current[1]?.focus()}
+          value={form.name}
+          onChangeText={change("name")}
+          autoCapitalize="words"
+          autoComplete="given-name"
+          textContentType="givenName"
+          maxLength={30}
+        />
+        <Field
+          label="Last name"
+          ref={(field) => {
+            fields.current[1] = field;
+          }}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => fields.current[2]?.focus()}
+          value={form.last_name}
+          onChangeText={change("last_name")}
+          autoCapitalize="words"
+          autoComplete="family-name"
+          textContentType="familyName"
+          maxLength={150}
+        />
+        <Field
+          label="Username"
+          ref={(field) => {
+            fields.current[2] = field;
+          }}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => fields.current[3]?.focus()}
+          value={form.username}
+          onChangeText={change("username")}
+          autoComplete="username-new"
+          textContentType="username"
+          autoCorrect={false}
+          maxLength={150}
+        />
+        <Field
+          label="Email"
+          ref={(field) => {
+            fields.current[3] = field;
+          }}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => fields.current[4]?.focus()}
+          value={form.email}
+          onChangeText={change("email")}
+          keyboardType="email-address"
+          autoComplete="email"
+          textContentType="emailAddress"
+          autoCorrect={false}
+        />
+        <Field
+          label="Password"
+          ref={(field) => {
+            fields.current[4] = field;
+          }}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => fields.current[5]?.focus()}
+          value={form.password}
+          onChangeText={change("password")}
+          secureTextEntry
+          autoComplete="new-password"
+          textContentType="newPassword"
+          hint="Use at least 8 characters. Avoid common passwords and personal details."
+        />
+        <Field
+          label="Confirm password"
+          ref={(field) => {
+            fields.current[5] = field;
+          }}
+          returnKeyType="next"
+          submitBehavior="submit"
+          onSubmitEditing={() => fields.current[6]?.focus()}
+          value={confirmation}
+          onChangeText={setConfirmation}
+          secureTextEntry
+          autoComplete="new-password"
+          textContentType="newPassword"
+        />
+        <Field
+          label="Height in cm (optional)"
+          ref={(field) => {
+            fields.current[6] = field;
+          }}
+          value={form.height}
+          onChangeText={change("height")}
+          keyboardType="number-pad"
+          maxLength={3}
+          hint="You will need a recorded height to book height-restricted rides."
+          onSubmitEditing={submit}
+        />
+        <ErrorMessage error={error} />
+        <Button
+          onPress={submit}
+          isDisabled={
+            busy ||
+            !form.name.trim() ||
+            !form.last_name.trim() ||
+            !form.username.trim() ||
+            !form.email.trim() ||
+            !form.password ||
+            !confirmation
+          }
+        >
+          {busy && <ButtonSpinner />}
+          <ButtonText>
+            {busy ? "Creating account…" : "Create account"}
+          </ButtonText>
+        </Button>
+        <Button variant="link" onPress={() => router.replace("/sign-in")}>
+          <ButtonText>Already have an account? Sign in</ButtonText>
+        </Button>
+      </Card>
+    </Page>
+  );
+}
