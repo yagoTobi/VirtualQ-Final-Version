@@ -38,8 +38,9 @@ Primary sources:
 - Respect font scaling. Content scrolls; the bottom bar remains reachable and
   never covers the final action. Hide/adjust navigation when the keyboard needs
   that space, and keep focused fields/submission reachable.
-- The eventual bottom destinations are Explore, Map, Plans, Tickets and You.
-  Add destinations as their workflows become functional; never ship dead buttons.
+- The bottom destinations are Explore, Park map, Plans, Tickets and You. Each
+  retains its own selection and navigation history; pressing the active tab
+  returns its stack to the root. Never ship dead buttons.
 - Plan panels show real dates, party sizes, booking times and server status.
   Ride duration must not be represented as live wait time.
 
@@ -64,3 +65,12 @@ The first native sign-in screen also wasted vertical space. Its title, header
 and panel padding were reduced. Keyboard-open submission, successful sign-in,
 secure session restoration and sign-out now pass on Pixel 10. See
 [verification](VERIFICATION.md) for evidence and outstanding checks.
+
+## Navigation continuity
+
+The header, five bottom destinations and next-plan panel belong to one visitor
+layout. Main tabs use a short 160 ms fade. Detail/form transitions use Expo’s
+native stack, and Android/iOS/web reduced-motion preferences disable movement.
+Keep loaded content visible during refresh, retain dates/search/map selection on
+tab roundtrips, and dismiss back to existing list screens after finishing a form.
+The staff portal remains outside this phone navigation layout.
