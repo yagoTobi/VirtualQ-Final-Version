@@ -130,6 +130,34 @@ class VisitBookingTest(TestCase):
         self.api.force_authenticate(None)
         self.assertEqual(self.api.get(path).status_code, 401)
 
+    def test_ticket_lookup_identifies_owner_and_date_without_admitting(self):
+        path = "/api/tickets/tickets/validate/"
+        ticket = self.tickets[1]
+        for offset, state in ((1, "upcoming"), (0, "today"), (-1, "past")):
+            Ticket.objects.filter(pk=ticket.pk).update(date_of_visit=timezone.localdate() + timedelta(days=offset))
+            response = self.api.post(path, {"ticket_id": f" {ticket.ticket_id} "}, format="json")
+            self.assertEqual(response.status_code, 200, response.data)
+            self.assertEqual(response.data["ticket"]["id"], ticket.pk)
+            self.assertEqual(response.data["visit_status"], state)
+            self.assertEqual(response.data["visitor_name"], ticket.guest.name)
+            self.assertIn("no-store", response["Cache-Control"])
+        self.assertFalse(RideReservation.objects.exists())
+        self.api.force_authenticate(get_user_model().objects.get(username="demo-admin"))
+        foreign = self.api.post(path, {"ticket_id": ticket.ticket_id}, format="json")
+        unknown = self.api.post(path, {"ticket_id": "unknown"}, format="json")
+        self.assertEqual(foreign.status_code, 400)
+        self.assertEqual(foreign.data, unknown.data)
+        self.api.force_authenticate(None)
+        self.assertEqual(self.api.post(path, {"ticket_id": ticket.ticket_id}).status_code, 401)
+
+    def test_ticket_lookup_rejects_malformed_and_ambiguous_codes(self):
+        path = "/api/tickets/tickets/validate/"
+        for data in ({}, {"ticket_id": None}, {"ticket_id": ""}, {"ticket_id": "x" * 201}, {"ticket_id": []}, []):
+            with self.subTest(data=data):
+                self.assertEqual(self.api.post(path, data, format="json").status_code, 400)
+        Ticket.objects.filter(pk=self.tickets[1].pk).update(ticket_id=self.tickets[0].ticket_id)
+        self.assertEqual(self.api.post(path, {"ticket_id": self.tickets[0].ticket_id}).status_code, 400)
+
     def test_malformed_filters_return_validation_errors(self):
         for date in ("2026-02-30", "yesterday", ""):
             self.assertEqual(self.api.get("/api/tickets/tickets-view/", {"date_of_visit": date}).status_code, 400)

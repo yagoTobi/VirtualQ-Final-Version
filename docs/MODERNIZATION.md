@@ -4,6 +4,7 @@ Baseline: `566cdc5` on `main`. Work branch: `codex/virtualq-modernization`.
 Foundation review: PR #2. Visitor workflow work continues on
 `codex/virtualq-visitor-workflows` (PR #3), based on that foundation.
 Reservations continue on the stacked `codex/virtualq-reservations` branch.
+Ticket scanning continues on `codex/virtualq-ticket-scanner`, based on reservations.
 The restored Expo 48 client remains runnable until its replacement passes the
 Android and web foundation gates. Django and its existing model identities stay.
 The historical database is preserved locally; migrations run against the separate
@@ -15,7 +16,7 @@ The historical database is preserved locally; migrations run against the separat
 | --- | --- | --- |
 | Baseline | Clean checkpoint; inventory and plan committed | Recorded |
 | Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | Runtime/build gates and CI passed |
-| Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Accounts, visits, guests, plans and ride passes migrated; remaining routes/checks pending |
+| Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Accounts, visits, guests, plans, ride passes and scanner migrated; remaining web pages/checks pending |
 | Operations | All management resources below have authorized search, forms, validation and confirmations | Pending |
 | Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | Pending |
 | Product verification | Browser and Pixel 10 critical-flow walkthrough, mobile/desktop screenshots, build checks | Pending |
@@ -48,6 +49,8 @@ container. No additional list library or speculative memoization was introduced.
 The compact next-plan banner refreshes on focus and expires finished reservations
 using a focus-scoped timer. Visitor selections and time slots use gluestack
 Checkbox/Button, with server availability rechecked on confirmation.
+Ticket scanning uses Expo Camera with a manual code fallback. The backend returns
+the owner's pass and date classification; admission remains a staff operation.
 
 Phone-first direction (confirmed by the user): the visitor experience is designed
 and reviewed on a phone before desktop adaptation. Keep bottom navigation and the

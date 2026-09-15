@@ -98,7 +98,25 @@ still need their own verification.
   request limits before public deployment. No production deployment is performed.
 - Previously committed credentials/data remain in Git history. Local historical
   files are preserved and ignored. Credential rotation/history decisions belong
-  to the repository owner; this branch does not rewrite shared history.
+to the repository owner; this branch does not rewrite shared history.
+
+## Ticket lookup and camera permissions
+
+The former “ticket is valid” endpoint now identifies the owner's ticket and its
+visit date/status. It performs no admission mutation. Unknown codes and another
+account's codes return the same error; malformed inputs and duplicate historical
+codes return 400. Results use `private, no-store`.
+
+The gluestack scanner uses the already pinned Expo camera service, supports
+manual input after permission denial and distinguishes today/future/past visits.
+It unmounts the preview after scanning, on route blur or app backgrounding.
+Pending lookups use the shared timeout and abort on blur. Input/scan submission
+dismisses the keyboard so the result can use the phone viewport.
+
+Verification: 38 backend tests, native permission/manual/camera walkthrough and
+configuration introspection. The standalone configuration does not request
+microphone recording. This does not establish physical-device scanner accuracy
+or native release performance.
 
 ## Pending review tracks
 
@@ -108,7 +126,7 @@ complete visual review remain pending. Foundation native evidence is recorded in
 
 ## Frontend dependency review — 15 September 2026
 
-The lockfile pins Expo 57.0.22, React Native 0.86.3, gluestack core 5.0.15,
+The lockfile pins Expo 57.0.23, React Native 0.86.3, gluestack core 5.0.15,
 UniWind 1.11.0 and Tailwind 4.3.2. Expo's version-alignment check passes.
 UniWind/Tailwind's subsequent combination applied desktop media rules on Android;
 keep this pair until an upstream fix is tested on the emulator.
@@ -130,3 +148,11 @@ The official copied Select includes Legend Motion, which pulls a NativeWind 4
 peer with a Tailwind 3 peer warning. The active screens use UniWind; review/remove
 unused generated components and their dependencies after the forms migration.
 Do not accept a blind forced audit fix that downgrades Expo or its router.
+
+Scanner CI initially failed when Expo's online compatibility recommendation
+advanced to 57.0.23 during the work. The exact Expo and Babel preset pins were
+updated to 57.0.23 / 57.0.12 after reviewing the published package diffs.
+Compatibility, types, lint, tests, the audit gate and all platform exports pass
+locally. The Pixel ticket layout still fits all three passes and the bottom
+banner. The patch also contains iOS scene-life-cycle changes; these still need
+the native iOS build/runtime verification tracked in the plan.
