@@ -39,7 +39,7 @@ function Pass() {
       await api(`/api/queue/reservations/${encodeURIComponent(id)}/`, token, {
         method: "DELETE",
       });
-      router.replace("/plans");
+      router.dismissTo("/plans");
     } catch (err) {
       setFailure(err);
       setConfirm(false);
@@ -113,7 +113,7 @@ function Pass() {
             <ButtonText>Cancel this reservation</ButtonText>
           </Button>
         ))}
-      <Button variant="link" onPress={() => router.replace("/plans")}>
+      <Button variant="link" onPress={() => router.dismissTo("/plans")}>
         <ButtonText>Back to plans</ButtonText>
       </Button>
     </Page>

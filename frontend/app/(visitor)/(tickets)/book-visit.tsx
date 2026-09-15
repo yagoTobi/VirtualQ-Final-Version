@@ -61,7 +61,7 @@ function BookingForm() {
           confirm_removal: confirmed,
         }),
       });
-      router.replace({ pathname: "/tickets", params: { date } });
+      router.dismissTo({ pathname: "/tickets", params: { date } });
     } catch (err) {
       setError(err);
       setConfirm(
@@ -136,7 +136,7 @@ function BookingForm() {
         <Button
           variant="outline"
           onPress={() =>
-            router.replace({ pathname: "/tickets", params: { date } })
+            router.dismissTo({ pathname: "/tickets", params: { date } })
           }
         >
           <ButtonText>

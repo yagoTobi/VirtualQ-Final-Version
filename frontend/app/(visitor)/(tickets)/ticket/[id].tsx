@@ -80,7 +80,7 @@ function TicketPass() {
           <Button
             variant="outline"
             onPress={() =>
-              router.replace({
+              router.dismissTo({
                 pathname: "/tickets",
                 params: { date: data.ticket.date_of_visit },
               })

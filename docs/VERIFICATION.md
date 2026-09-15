@@ -219,6 +219,60 @@ and Babel preset 57.0.12. Local compatibility/audit gates and all platform expor
 pass again; a fresh Metro/Expo Go launch visually confirmed the compact Tickets
 layout. Android's Hermes bundle hash is unchanged by this patch. Native iOS
 scene-life-cycle changes are not verified by an iOS JavaScript export.
+The scanner push and PR checks, including GitGuardian, pass at `6be6885` (PR #5).
+
+## Persistent mobile navigation — 15 September 2026
+
+The Pixel 10 check reproduced two issues in the original navigation: tab changes
+slid duplicate headers/bottom controls across each other, and Tickets reset
+September 16 to September 15 on a roundtrip. The revised layout keeps one header,
+bottom bar and next-plan component, with a native stack for each tab and a short
+160 ms tab fade.
+
+Verified with the synthetic QA account:
+
+- Tickets → Park map → Explore → Plans → Tickets retained September 16 and all
+  three passes. A date manually changed to September 17 also survived a Map
+  roundtrip. Both dates are future visits relative to September 15.
+- Opening a park pass, returning to the group, opening/backing out of visit
+  booking and opening/cancelling profile editing reached the expected screens.
+- Returning from the scanner retains the selected date and passes, even when
+  the back link omits date parameters. Choosing September 17 in the visit form
+  and returning explicitly updated the existing Tickets tab; selecting September
+  16 again restored the three passes.
+- Leaving an open pass for Map and returning to Tickets reopened the same pass.
+  Pressing the active Tickets tab again returned to the existing group/date.
+  Map pin 2 and the Java search also survived navigation; the search was cleared
+  after verification.
+- Repeated sign-out/sign-in returned to Tickets. Native keyboard submission and
+  the form button closed the keyboard and restored the five bottom tabs and
+  next-plan banner. Android reported `mInputShown=false` after submission.
+- After visiting Account and signing out, Android Back from the Tickets sign-in
+  prompt returned to Explore. Protected account/profile history no longer sends
+  the visitor back into sign-in. Stored authentication was restored on a fresh
+  Expo Go launch.
+- Android's animation scale was toggled from 1.0 to 0 with React DevTools
+  connected. The mounted stack's reduced-motion context changed false → true,
+  then back to false when 1.0 was restored. No reload was required.
+
+| Phone tickets and persistent bottom controls | Compact account panel |
+| --- | --- |
+| ![Tickets](verification/android-navigation-tickets.png) | ![Account](verification/android-navigation-account.png) |
+
+Transition frame comparisons and sampling limits are in
+[PERFORMANCE.md](PERFORMANCE.md#navigation-continuity--15-september-2026).
+The account card now relies on the global Tickets/Plans tabs to save space and
+avoid duplicate navigation paths. The provisional map and Explore panels remain.
+
+Type checking, lint and five frontend tests pass. New hook tests cover retained
+content during refocus/reload, offline error feedback, revoked-access clearing,
+account/date isolation and ignored late responses. Web and Android/iOS JavaScript
+exports pass; the nested route groups produce 62 static entries including aliases
+for the same 17 public routes (15 visitor routes plus sitemap/not-found).
+The web main bundle remains 1.8 MB plus 45 KB additional JS and 44 KB CSS;
+Android/iOS Hermes exports remain 3.7/3.4 MB. CI rechecks the final committed tree.
+No release FPS, physical-device, iOS runtime or desktop interaction result is
+inferred from these checks.
 
 ## Checks still required
 

@@ -4,7 +4,8 @@ Baseline: `566cdc5` on `main`. Work branch: `codex/virtualq-modernization`.
 Foundation review: PR #2. Visitor workflow work continues on
 `codex/virtualq-visitor-workflows` (PR #3), based on that foundation.
 Reservations continue on the stacked `codex/virtualq-reservations` branch.
-Ticket scanning continues on `codex/virtualq-ticket-scanner`, based on reservations.
+Ticket scanning continues on `codex/virtualq-ticket-scanner` (PR #5), based on reservations.
+Persistent mobile navigation continues on `codex/virtualq-navigation`, based on scanning.
 The restored Expo 48 client remains runnable until its replacement passes the
 Android and web foundation gates. Django and its existing model identities stay.
 The historical database is preserved locally; migrations run against the separate
@@ -43,11 +44,22 @@ The date control uses Expo's supported native picker and the browser's date
 input, with gluestack labels/buttons. QR PNGs come from Django's existing encoder.
 Core 5.0.15's input ref declaration names props instead of the forwarded native
 TextInput instance; the local copied input corrects that type boundary for
-keyboard focus. Data requests refresh on route focus and abort on blur.
+keyboard focus. Data requests refresh on route focus and abort on blur. Warm
+refreshes retain the current screen’s data; URL/account changes hide it immediately.
+Authorization/not-found responses discard retained private results.
 The plans screen uses React Native's built-in FlatList in a non-scrolling page
 container. No additional list library or speculative memoization was introduced.
-The compact next-plan banner refreshes on focus and expires finished reservations
-using a focus-scoped timer. Visitor selections and time slots use gluestack
+The visitor header and bottom tabs live in one persistent layout. Each of the five
+tabs has its own native stack; route groups preserve existing public URLs. Tabs
+fade over 160 ms and details use the platform’s native stack transition, with
+reduced motion respected. Ticket dates accept explicit route parameters and persist in the mounted tab;
+links without a date retain the selection. Tab switches preserve mounted screens
+and their selections. Account/profile history is protected after sign-out, and
+Back at a tab root returns to Explore. The account card uses the global bottom
+tabs instead of duplicate Tickets/Plans shortcuts. Completed/back actions dismiss to
+the existing screen instead of adding duplicate list pages.
+The compact next-plan banner refreshes when the active path changes and expires
+finished reservations using a focus-scoped timer. Visitor selections and time slots use gluestack
 Checkbox/Button, with server availability rechecked on confirmation.
 Ticket scanning uses Expo Camera with a manual code fallback. The backend returns
 the owner's pass and date classification; admission remains a staff operation.

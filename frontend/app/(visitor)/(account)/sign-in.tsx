@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import type { TextInput } from "react-native";
+import { Keyboard, type TextInput } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Page } from "@/components/page";
 import { Field } from "@/components/field";
@@ -23,6 +23,7 @@ export default function SignIn() {
   const [error, setError] = useState<unknown>(null);
   async function submit() {
     if (busy) return;
+    Keyboard.dismiss();
     setBusy(true);
     setError(null);
     try {
@@ -35,7 +36,9 @@ export default function SignIn() {
         },
       );
       await signIn(token);
-      router.replace(afterAuth(next));
+      router.dismissTo("/account");
+      const destination = afterAuth(next);
+      if (destination !== "/account") router.navigate(destination);
     } catch (err) {
       setError(err);
     } finally {

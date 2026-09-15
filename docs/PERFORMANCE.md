@@ -86,3 +86,34 @@ remaining capacity and own-ticket conflicts are computed from that result.
 The reservation export contains sixteen web routes (1.8 MB JS + 42 KB CSS);
 Android/iOS Hermes exports are 3.7/3.4 MB. These remain JavaScript export sizes,
 not installed native binary sizes. No release performance claim is made.
+
+## Navigation continuity — 15 September 2026
+
+Baseline at `6be6885`: Tickets was opened for September 16, then the sequence
+Park map → Explore → Plans → Tickets → Park map was recorded on the same Pixel.
+Returning to Tickets reset the date to September 15 and replaced the three passes
+with an empty state. Frame inspection also showed repeated headers and bottom
+controls sliding across each other because every route owned a whole page shell.
+
+The targeted change uses one persistent visitor shell, JavaScript Tabs with a
+native stack per destination, and a 160 ms native-driven tab fade. Existing
+screens stay mounted, and focus refreshes retain matching data. No animation,
+cache, memoization or state library was added. The same tab sequence retained
+September 16 and all three passes; sampled transition frames show the header and
+bottom controls staying in place.
+
+![Original transitions](verification/android-navigation-before.png)
+![Persistent navigation transitions](verification/android-navigation-after.png)
+
+Local raw evidence is ignored under `.local/verification/`: `virtualq-nav-before.mp4`,
+`virtualq-nav-after.mp4`, `nav-before-frames/`, `nav-after-frames/` and
+`navigation-reduced-motion.txt`. Frames were sampled at 100 ms using AVFoundation.
+The header region (0,72)–(540,150) in 540 × 1212 recordings changed materially in
+24 of 242 baseline samples and 0 of 186 revised samples (more than 2% of pixels
+changing by over 16 RGB levels). This supports header stability only; clip length,
+operator pauses and 10 Hz sampling cannot establish FPS or transition latency.
+
+With React DevTools attached, Android’s transition animation scale was changed
+from 1.0 to 0. The mounted VisitorStack’s reduced-motion context changed from
+false to true, then back to false after restoring 1.0. App preferences follow the
+OS without reloading. iOS/browser runtime preference checks remain outstanding.

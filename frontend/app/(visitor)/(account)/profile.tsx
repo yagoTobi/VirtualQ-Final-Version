@@ -49,7 +49,7 @@ function ProfileForm() {
         }),
       });
       await refresh();
-      router.replace("/account");
+      router.dismissTo("/account");
     } catch (err) {
       setError(err);
     } finally {
@@ -118,7 +118,7 @@ function ProfileForm() {
           {busy && <ButtonSpinner />}
           <ButtonText>{busy ? "Saving…" : "Save details"}</ButtonText>
         </Button>
-        <Button variant="outline" onPress={() => router.replace("/account")}>
+        <Button variant="outline" onPress={() => router.dismissTo("/account")}>
           <ButtonText>Cancel</ButtonText>
         </Button>
       </Card>

@@ -30,12 +30,6 @@ export default function Account() {
           {user.name} {user.last_name}
         </Text>
         <Text className="text-muted-foreground">{user.email}</Text>
-        <Button onPress={() => router.push("/tickets")}>
-          <ButtonText>Tickets & your group</ButtonText>
-        </Button>
-        <Button variant="outline" onPress={() => router.push("/plans")}>
-          <ButtonText>Your ride plans</ButtonText>
-        </Button>
         <Button variant="outline" onPress={() => router.push("/profile")}>
           <ButtonText>Edit your details</ButtonText>
         </Button>
@@ -48,7 +42,7 @@ export default function Account() {
             setError(null);
             try {
               await signOut();
-              router.replace("/");
+              router.navigate("/");
             } catch (err) {
               setError(err);
             } finally {

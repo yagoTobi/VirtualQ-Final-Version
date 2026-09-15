@@ -24,8 +24,15 @@ export default function Tickets() {
 }
 
 function TicketList() {
-  const params = useLocalSearchParams<{ date?: string }>();
-  const [date, setDate] = useState(visitDate(params.date));
+  const params = useLocalSearchParams<{ date?: string | string[] }>();
+  const dateParam = typeof params.date === "string" ? params.date : undefined;
+  const [date, setDate] = useState(visitDate(dateParam));
+  const [previousDateParam, setPreviousDateParam] = useState(dateParam);
+  // Apply explicit linked dates before rendering children; back links may omit them.
+  if (dateParam !== previousDateParam) {
+    setPreviousDateParam(dateParam);
+    if (dateParam !== undefined) setDate(visitDate(dateParam));
+  }
   const { token, user } = useAuth();
   const { data, error, loading, reload } = useResource<Ticket[]>(
     `/api/tickets/tickets-view/?date_of_visit=${encodeURIComponent(date)}`,
@@ -37,7 +44,15 @@ function TicketList() {
       subtitle="Pick a day to find everyone's park pass."
     >
       <Card size="sm" className="w-full max-w-xl">
-        <DateField label="Visit date" value={date} onChange={setDate} />
+        <DateField
+          label="Visit date"
+          value={date}
+          onChange={(value) => {
+            const selected = visitDate(value);
+            setDate(selected);
+            router.setParams({ date: selected });
+          }}
+        />
         <Button
           onPress={() =>
             router.push({ pathname: "/book-visit", params: { date } })

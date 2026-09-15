@@ -24,7 +24,7 @@ export default function RideDetail() {
       <Button
         variant="link"
         className="self-start"
-        onPress={() => router.replace("/")}
+        onPress={() => router.dismissTo("/")}
       >
         <ButtonText>← All adventures</ButtonText>
       </Button>
