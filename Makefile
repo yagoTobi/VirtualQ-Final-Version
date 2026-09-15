@@ -27,5 +27,6 @@ preview-android:
 
 frontend-check:
 	cd frontend && PATH="$(CURDIR)/.local/node/node_modules/.bin:$$PATH" npm run typecheck
+	cd frontend && PATH="$(CURDIR)/.local/node/node_modules/.bin:$$PATH" npm test
 	cd frontend && PATH="$(CURDIR)/.local/node/node_modules/.bin:$$PATH" npm run lint
 	cd frontend && PATH="$(CURDIR)/.local/node/node_modules/.bin:$$PATH" CI=1 npm run build:web

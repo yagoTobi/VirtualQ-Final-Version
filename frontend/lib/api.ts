@@ -37,11 +37,14 @@ export async function api<T>(
   init: RequestInit = {},
 ): Promise<T> {
   const controller = new AbortController();
+  const cancel = () => controller.abort();
+  if (init.signal?.aborted) cancel();
+  init.signal?.addEventListener("abort", cancel);
   const timer = setTimeout(() => controller.abort(), 20000);
   try {
     const response = await fetch(`${API_URL}${path}`, {
       ...init,
-      signal: init.signal || controller.signal,
+      signal: controller.signal,
       headers: {
         ...(init.body && !(init.body instanceof FormData)
           ? { "Content-Type": "application/json" }
@@ -70,6 +73,7 @@ export async function api<T>(
     );
   } finally {
     clearTimeout(timer);
+    init.signal?.removeEventListener("abort", cancel);
   }
 }
 

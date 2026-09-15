@@ -44,7 +44,16 @@ Draft PR: [#2](https://github.com/yagoTobi/VirtualQ-Final-Version/pull/2).
 GitGuardian scanned the initial four commits without finding new secrets.
 GitHub rejected the first workflow before running jobs because `runner.temp` was
 used in job-level `env`, where the runner context is unavailable. The test path is
-now set at step scope. CI results remain pending until the corrected run finishes.
+now set at step scope. The corrected push and PR runs passed at `c4b68f9`
+([PR run](https://github.com/yagoTobi/VirtualQ-Final-Version/actions/runs/34939340782)),
+including all 22 backend tests, clean npm install, types/lint, dependency alignment,
+the high-severity audit gate and web/Android/iOS exports.
+
+The shared HTTP client now combines screen cancellation with its own timeout;
+previously supplying a screen signal bypassed the timeout. Two Node regression
+tests cover both abort paths, an already-cancelled request, authentication headers,
+structured API errors and empty cancellation responses. These use the actual
+TypeScript client with mocked platform imports/network and add no test dependency.
 
 ## Checks still required
 

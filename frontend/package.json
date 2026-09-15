@@ -43,6 +43,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
+    "test": "node --test tests/*.test.cjs",
     "build:web": "expo export --platform web",
     "build:android": "expo export --platform android",
     "build:ios": "expo export --platform ios",

@@ -11,7 +11,7 @@ The historical database is preserved locally; migrations run against the separat
 | Milestone | Acceptance | Status |
 | --- | --- | --- |
 | Baseline | Clean checkpoint; inventory and plan committed | Recorded |
-| Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | Runtime/build gates passed; CI pending |
+| Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | Runtime/build gates and CI passed |
 | Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Pending |
 | Operations | All management resources below have authorized search, forms, validation and confirmations | Pending |
 | Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | Pending |
