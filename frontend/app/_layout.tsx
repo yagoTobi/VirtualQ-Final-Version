@@ -13,12 +13,13 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <SafeAreaListener onChange={({ insets }) => Uniwind.updateInsets(insets)}>
-        <GluestackUIProvider mode="light">
-          <AuthProvider>
+        {/* Overlay children need the same session as the screen that opened them. */}
+        <AuthProvider>
+          <GluestackUIProvider mode="light">
             <StatusBar style="dark" />
             <Stack screenOptions={{ headerShown: false }} />
-          </AuthProvider>
-        </GluestackUIProvider>
+          </GluestackUIProvider>
+        </AuthProvider>
       </SafeAreaListener>
     </SafeAreaProvider>
   );
