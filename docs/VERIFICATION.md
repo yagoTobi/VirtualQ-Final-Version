@@ -40,7 +40,11 @@ exports, not native binary builds. Source checks now exclude generated exports:
 the first parallel export/typecheck exposed a stale generated-file inclusion.
 The scoped xcode UUID override generated 100 unique valid project identifiers.
 The npm high-severity audit gate passes with three tracked moderate findings.
-CI is added in `.github/workflows/checks.yml`; GitHub results are pending.
+Draft PR: [#2](https://github.com/yagoTobi/VirtualQ-Final-Version/pull/2).
+GitGuardian scanned the initial four commits without finding new secrets.
+GitHub rejected the first workflow before running jobs because `runner.temp` was
+used in job-level `env`, where the runner context is unavailable. The test path is
+now set at step scope. CI results remain pending until the corrected run finishes.
 
 ## Checks still required
 

@@ -11,8 +11,6 @@ permissions:
 jobs:
   backend:
     runs-on: ubuntu-latest
-    env:
-      DJANGO_TEST_DATABASE_PATH: ${{ runner.temp }}/virtualq-tests.sqlite3
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-python@v7.0.0
@@ -23,6 +21,8 @@ jobs:
       - run: python manage.py check
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py test
+        env:
+          DJANGO_TEST_DATABASE_PATH: ${{ runner.temp }}/virtualq-tests.sqlite3
 
   frontend:
     runs-on: ubuntu-latest

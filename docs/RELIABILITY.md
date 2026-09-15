@@ -75,6 +75,12 @@ UniWind 1.11.0 and Tailwind 4.3.2. Expo's version-alignment check passes.
 UniWind/Tailwind's subsequent combination applied desktop media rules on Android;
 keep this pair until an upstream fix is tested on the emulator.
 
+This review's npm counts concern `frontend/` only. On the first feature-branch
+push, GitHub reported **109 default-branch dependency alerts** (4 critical,
+63 high, 33 moderate, 9 low). Legacy dependencies remain until migration parity
+allows their removal. The replacement's audit gate does not establish that the
+entire repository is free of vulnerable dependencies.
+
 `npm audit` reports three moderate findings and no high/critical findings after a
 scoped `xcode → uuid 11.1.1` override. The remaining decode-uri-component advisory
 (GHSA-vcc3-ghjq-m6fr) is inherited through Expo Router's query-string dependency.
