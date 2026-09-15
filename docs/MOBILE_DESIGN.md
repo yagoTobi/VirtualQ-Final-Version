@@ -68,9 +68,24 @@ secure session restoration and sign-out now pass on Pixel 10. See
 
 ## Navigation continuity
 
-The header, five bottom destinations and next-plan panel belong to one visitor
-layout. Main tabs use a short 160 ms fade. Detail/form transitions use Expo’s
-native stack, and Android/iOS/web reduced-motion preferences disable movement.
+The five bottom destinations and next-plan panel belong to one visitor layout.
+Phones use platform stack headers and back controls; the shared branded header
+is reserved for web. Main tabs use a short 160 ms fade. Detail/form transitions
+use Expo’s native stack, and Android/iOS/web reduced-motion preferences disable movement.
 Keep loaded content visible during refresh, retain dates/search/map selection on
 tab roundtrips, and dismiss back to existing list screens after finishing a form.
 The staff portal remains outside this phone navigation layout.
+
+## Native layout refinement — 15 September 2026
+
+The user found the visitor UI too similar to a website resized for a phone.
+The first correction removes repeated promotional headings, reduces the park
+summary and next-plan banner, groups compact ride rows, and makes ride/ticket
+rows tappable across their width. Native cards use less internal spacing and
+omit web shadows. Explore and Tickets offer native pull-to-refresh.
+
+On the Pixel 10, all three seeded rides now fit above the bottom banner without
+scrolling. Ride details and booking stay within the originating Explore or Map
+stack. The Map → ride → booking → Back → Back check retained the selected pin.
+This is the first refinement pass; map presentation, remaining forms, larger
+fonts and smaller phones still need further review.

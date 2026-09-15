@@ -325,6 +325,32 @@ tests. Full image-upload forms, narrower browser layouts and all role-specific
 screens also need a browser pass. No physical device, native release binary,
 iOS runtime, production deployment or release performance result is inferred.
 
+## Native layout checkpoint — 15 September 2026
+
+Pixel 10 / Expo Go: native headers and back controls replace the branded web
+header. Explore shows all three demo rides without scrolling; the bottom banner
+and five tabs remain. Compact card spacing keeps the ride booking action above
+the navigation bar. Tickets use full-row touch targets.
+
+![Native Explore](verification/android-native-explore.png)
+![Native ride details](verification/android-native-ride.png)
+![Native tickets](verification/android-native-tickets.png)
+
+Tickets for **16 September (a future visit)** retained the holder and two guest
+passes through Map → Tickets. A separate native check selected map pin 2,
+opened Java Jamboree, opened its booking form, then used Android Back twice:
+it returned to the map with pin 2 still selected. The booking form correctly
+defaulted to 15 September and showed no tickets for that day; no booking was
+submitted during this navigation check.
+
+![Retained map selection](verification/android-native-map-return.png)
+
+Type checking, six frontend tests, lint, web export and Android/iOS JavaScript
+exports pass locally. New routes reuse the existing ride and reservation
+components. This does not establish release FPS, cold-start time, iOS runtime,
+large-font coverage or complete native design parity. Pull-to-refresh is
+implemented; its gesture and error-state walkthrough remains open.
+
 ## Checks still required
 
 Reset confirmation needs migration and runtime checks. Staff CRUD is implemented
