@@ -69,3 +69,20 @@ agent-device react-devtools profile export profile.json
   alone do not identify the heaviest modules.
 - Android 16 KB binary alignment and a physical-device/iOS runtime pass when
   producing native release builds.
+
+## Reservation implementation — 15 September 2026
+
+Plans use the built-in FlatList outside the page ScrollView, with stable
+reservation IDs and dynamic row heights. This avoids eagerly mounting an
+unbounded reservation history without adding another list dependency. It is an
+implementation choice, not a measured FPS improvement. Large-history profiling
+is still required.
+
+The next-plan clock runs only while its route is focused and cleans up on blur.
+Requests use the existing abort/timeout boundary and refresh after navigation.
+Booking options require three database queries independently of party size;
+remaining capacity and own-ticket conflicts are computed from that result.
+
+The reservation export contains sixteen web routes (1.8 MB JS + 42 KB CSS);
+Android/iOS Hermes exports are 3.7/3.4 MB. These remain JavaScript export sizes,
+not installed native binary sizes. No release performance claim is made.

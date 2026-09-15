@@ -108,16 +108,7 @@ success does not substitute for that walkthrough.
 The RN performance skill and development profiling results are recorded in
 [PERFORMANCE.md](PERFORMANCE.md). No release FPS/TTI improvement is claimed.
 
-## Checks still required
-
-Reset confirmation, remaining guest/avatar flows, ride reservations, cancellation,
-camera scanning and staff CRUD need migration and runtime checks. New visitor
-forms also need their desktop web walkthrough. Additional large-font,
-screen-reader, smaller-phone and desktop checks
-remain. No physical device, iOS simulator, native release binary or app-store
-installation has been verified.
-
-## Reservation regression pass
+## Initial reservation regression pass
 
 All 22 backend tests pass with `DJANGO_TEST_DATABASE_PATH` set to a fresh temporary
 SQLite file. Coverage now includes opening/closing boundaries, same-day past
@@ -126,3 +117,62 @@ batch rollback, released capacity, rescheduling, admission fields, preserved
 duration and malformed filters. Two concurrent connections competing for one seat
 produce exactly one successful booking. This is API/database evidence; native
 reservation forms still need migration and the subsequent walkthrough.
+
+## Native ride reservations — 15 September 2026
+
+On the same Pixel 10 / Expo Go environment, with the synthetic QA party:
+
+- Chose the account holder and one height-eligible guest for Python Plunge on
+  September 16 at 10:00. A guest without the required recorded height was
+  disabled, with a reason and a details action.
+- Reviewed names, date, start/end time and park time zone before confirming.
+  Confirmation produced two separate passes in the compact Plans list.
+- Opened the account holder's ride QR. macOS Vision decoded the actual screenshot,
+  and the result matched that QA reservation's stored code.
+- Opened cancellation, chose “Keep reservation”, then reopened it and confirmed.
+  Only the account holder's reservation disappeared; the guest's pass remained.
+- Opened Explore's next-plan banner before and after cancellation. Its action
+  first opened the account holder's pass, then the remaining guest's pass after
+  the screen refocused. The five bottom destinations remain visible and usable.
+- Restarted Metro and Expo Go with the final UI refinements. Native accessibility
+  labels now identify visitors by name and party position instead of ticket IDs.
+  Selecting the already-booked guest disables 10:00 while adjacent choices remain
+  available. The other guest remains disabled for missing height.
+
+| Visitor eligibility and conflict | Review before booking |
+| --- | --- |
+| ![Eligibility](verification/android-reservation-conflict.png) | ![Review](verification/android-reservation-review.png) |
+
+| Compact plans | Ride QR |
+| --- | --- |
+| ![Plans](verification/android-plans.png) | ![Ride QR](verification/android-reservation-qr.png) |
+
+| Individual cancellation | Dynamic bottom banner |
+| --- | --- |
+| ![Cancellation](verification/android-reservation-cancel.png) | ![Next plan](verification/android-next-plan.png) |
+
+All captures contain synthetic local QA data. The QR shown above was subsequently
+cancelled. The floating gear belongs to Expo Go, not VirtualQ.
+
+Automated checks: 36 Django tests pass on a disposable file-backed SQLite database;
+three frontend request/navigation tests, type checking and lint pass. The added
+API tests cover availability capacity/conflicts, recorded-height eligibility,
+three view queries, privacy, past-time/maintenance filtering, admitted/finished
+cancellation restrictions, QR ownership and calendar/duration overflow.
+The final overflow regression was also rerun after strengthening its last-date
+case; migration drift is absent.
+
+Web export passes with sixteen routes (1.8 MB JS + 42 KB CSS); Android/iOS Hermes
+exports pass at 3.7/3.4 MB. CI must recheck the committed final refinements. These
+are JavaScript exports, not native binary builds. Desktop browser interaction
+remains pending; computer control still reports no attached browser provider.
+
+## Checks still required
+
+Reset confirmation, camera scanning and staff CRUD need migration and runtime
+checks. Existing Django booking/authentication pages still need their shared
+visual treatment. Visitor forms need a desktop web walkthrough. Additional
+large-font, screen-reader, smaller-phone and long-history checks remain.
+Avatar selection is intentionally consolidated into initials until usable assets
+exist, as recorded in the migration plan. No physical device, iOS simulator,
+native release binary or app-store installation has been verified.

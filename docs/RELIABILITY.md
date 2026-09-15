@@ -65,10 +65,32 @@ Verification: 31 Django tests pass with a temporary file-backed SQLite database,
 including concurrent repeat bookings, removal/cascade rules, API/web parity,
 guest validation and QR ownership. No historical database or migration changed.
 
+## Reservation availability, passes and cancellation
+
+The booking-options API returns the owner's visitors, recorded-height eligibility,
+half-hour start choices, remaining peak capacity and conflicts for the owner's
+tickets. Other visitors' identities and ticket IDs are never returned. Its three
+database queries cover the ride, party and relevant bookings; confirmation still
+revalidates every rule inside the atomic booking transaction.
+
+Reservation responses include park-time timestamps and display names. Owner-only
+QR responses and ticket QR responses use `private, no-store`; missing historical
+reservation codes return useful validation feedback. Cancelling locks the ticket,
+ride and fresh reservation, rejects admitted/finished bookings and releases only
+that visitor's seat. Missing historical dates remain intact and cannot be cancelled.
+Out-of-range ride durations and the last calendar date cannot overflow slot generation.
+
+Verification: 36 Django tests pass with a disposable file-backed SQLite database,
+including the existing concurrency cases, availability query count, cross-ride
+conflicts, visitor privacy, cancellation restrictions and QR ownership. Pixel
+group booking, individual cancellation and QR evidence are in
+[VERIFICATION.md](VERIFICATION.md). Staff admission and row-locking databases
+still need their own verification.
+
 ## Still open
 
-- Staff ticket management/admission and visitor cancellation after admission need
-  additional validation and tests.
+- Staff ticket management/admission needs its own permission, date and atomic
+  transition tests. Visitor cancellation now rejects admitted or finished bookings.
 - Tokens are long-lived and logout revokes all sessions sharing that user's token.
   Native SecureStore persistence is verified on Pixel 10; the web uses tab-lifetime
   sessionStorage. These do not change the server token's lifetime.

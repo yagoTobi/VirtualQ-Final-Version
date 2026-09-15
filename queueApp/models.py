@@ -7,6 +7,7 @@ from hashlib import sha256
 import base64
 from django.utils import timezone
 from django.utils.crypto import get_random_string
+from .capacity import remaining_capacity
 
 
 class RideReservation(models.Model):
@@ -37,7 +38,6 @@ class RideReservation(models.Model):
 
         ride, ticket = self.ride, self.ticket
         start = datetime.datetime.combine(self.date, self.start_time)
-        end = start + datetime.timedelta(minutes=ride.ride_duration)
         if timezone.make_aware(start) <= timezone.now():
             raise ValidationError({"start_time": "Choose a future time."})
         if ticket.date_of_visit != self.date:
@@ -46,12 +46,14 @@ class RideReservation(models.Model):
             raise ValidationError({"ride": "The ride is currently under maintenance."})
         if ride.ride_duration <= 0 or ride.ride_capacity <= 0:
             raise ValidationError({"ride": "This ride is not available for booking."})
+        duration = datetime.timedelta(minutes=ride.ride_duration)
+        closing = datetime.datetime.combine(self.date, ride.closing_hour)
         if (
-            end.date() != self.date
-            or self.start_time < ride.opening_hour
-            or end.time() > ride.closing_hour
+            self.start_time < ride.opening_hour
+            or duration > closing - start
         ):
             raise ValidationError({"start_time": "The entire ride must fit within opening hours."})
+        end = start + duration
 
         if ticket.guest_number:
             height = getattr(getattr(ticket, "guest", None), "height", None)
@@ -68,15 +70,21 @@ class RideReservation(models.Model):
 
         # Count peak simultaneous riders; adjacent intervals do not consume a
         # seat together, even when historical bookings have different durations.
-        events = []
-        for other_start, other_end in overlapping.filter(ride=ride).values_list("start_time", "end_time"):
-            events.extend(((max(self.start_time, other_start), 1), (min(end.time(), other_end), -1)))
-        occupied = 0
-        for _, delta in sorted(events):
-            occupied += delta
-            if occupied >= ride.ride_capacity:
-                raise ValidationError({"start_time": "This time is full. Choose another time."})
+        if remaining_capacity(
+            overlapping.filter(ride=ride).values_list("start_time", "end_time"),
+            self.start_time, end.time(), ride.ride_capacity,
+        ) < 1:
+            raise ValidationError({"start_time": "This time is full. Choose another time."})
         self.end_time = end.time()
+
+    def starts_at(self):
+        return timezone.make_aware(datetime.datetime.combine(self.date, self.start_time)) if self.date else None
+
+    def ends_at(self):
+        return timezone.make_aware(datetime.datetime.combine(self.date, self.end_time)) if self.date else None
+
+    def can_cancel(self):
+        return not self.validated and self.ends_at() is not None and self.ends_at() > timezone.now()
 
     def _generate_reservation_ticket_id(self):
         data = f"{self.ticket.user.email}_{self.ticket.ticket_id}_{self.start_time}"

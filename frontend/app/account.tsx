@@ -33,6 +33,9 @@ export default function Account() {
         <Button onPress={() => router.push("/tickets")}>
           <ButtonText>Tickets & your group</ButtonText>
         </Button>
+        <Button variant="outline" onPress={() => router.push("/plans")}>
+          <ButtonText>Your ride plans</ButtonText>
+        </Button>
         <Button variant="outline" onPress={() => router.push("/profile")}>
           <ButtonText>Edit your details</ButtonText>
         </Button>

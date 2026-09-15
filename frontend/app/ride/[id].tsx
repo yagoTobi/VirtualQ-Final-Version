@@ -83,6 +83,18 @@ export default function RideDetail() {
                 Hours: {ride.opening_hour.slice(0, 5)}–
                 {ride.closing_hour.slice(0, 5)}
               </Text>
+              <Button
+                isDisabled={ride.under_maintenance}
+                onPress={() =>
+                  router.push({ pathname: "/reserve/[id]", params: { id } })
+                }
+              >
+                <ButtonText>
+                  {ride.under_maintenance
+                    ? "Booking unavailable"
+                    : "Reserve a ride"}
+                </ButtonText>
+              </Button>
               {ride.under_maintenance && (
                 <Text className="text-muted-foreground">
                   This ride is taking a short break. Check back before planning

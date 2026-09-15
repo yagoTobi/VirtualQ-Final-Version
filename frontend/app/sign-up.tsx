@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { TextInput } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Page } from "@/components/page";
 import { Field } from "@/components/field";
 import { ErrorMessage } from "@/components/feedback";
@@ -11,9 +11,11 @@ import { Text } from "@/components/ui/text";
 import { Button, ButtonText, ButtonSpinner } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { afterAuth } from "@/lib/after-auth";
 
 export default function SignUp() {
   const { signIn } = useAuth();
+  const { next } = useLocalSearchParams<{ next?: string }>();
   const fields = useRef<(TextInput | null)[]>([]);
   const [form, setForm] = useState({
     name: "",
@@ -54,7 +56,7 @@ export default function SignUp() {
         },
       );
       await signIn(token);
-      router.replace("/account");
+      router.replace(afterAuth(next));
     } catch (err) {
       setError(err);
     } finally {
@@ -190,7 +192,12 @@ export default function SignUp() {
             {busy ? "Creating account…" : "Create account"}
           </ButtonText>
         </Button>
-        <Button variant="link" onPress={() => router.replace("/sign-in")}>
+        <Button
+          variant="link"
+          onPress={() =>
+            router.replace({ pathname: "/sign-in", params: { next } })
+          }
+        >
           <ButtonText>Already have an account? Sign in</ButtonText>
         </Button>
       </Card>

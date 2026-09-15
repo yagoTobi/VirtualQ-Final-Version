@@ -2,7 +2,8 @@
 
 Baseline: `566cdc5` on `main`. Work branch: `codex/virtualq-modernization`.
 Foundation review: PR #2. Visitor workflow work continues on
-`codex/virtualq-visitor-workflows`, based on that foundation.
+`codex/virtualq-visitor-workflows` (PR #3), based on that foundation.
+Reservations continue on the stacked `codex/virtualq-reservations` branch.
 The restored Expo 48 client remains runnable until its replacement passes the
 Android and web foundation gates. Django and its existing model identities stay.
 The historical database is preserved locally; migrations run against the separate
@@ -14,7 +15,7 @@ The historical database is preserved locally; migrations run against the separat
 | --- | --- | --- |
 | Baseline | Clean checkpoint; inventory and plan committed | Recorded |
 | Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | Runtime/build gates and CI passed |
-| Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Pending |
+| Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Accounts, visits, guests, plans and ride passes migrated; remaining routes/checks pending |
 | Operations | All management resources below have authorized search, forms, validation and confirmations | Pending |
 | Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | Pending |
 | Product verification | Browser and Pixel 10 critical-flow walkthrough, mobile/desktop screenshots, build checks | Pending |
@@ -42,6 +43,11 @@ input, with gluestack labels/buttons. QR PNGs come from Django's existing encode
 Core 5.0.15's input ref declaration names props instead of the forwarded native
 TextInput instance; the local copied input corrects that type boundary for
 keyboard focus. Data requests refresh on route focus and abort on blur.
+The plans screen uses React Native's built-in FlatList in a non-scrolling page
+container. No additional list library or speculative memoization was introduced.
+The compact next-plan banner refreshes on focus and expires finished reservations
+using a focus-scoped timer. Visitor selections and time slots use gluestack
+Checkbox/Button, with server availability rechecked on confirmation.
 
 Phone-first direction (confirmed by the user): the visitor experience is designed
 and reviewed on a phone before desktop adaptation. Keep bottom navigation and the
