@@ -167,9 +167,55 @@ exports pass at 3.7/3.4 MB. CI must recheck the committed final refinements. The
 are JavaScript exports, not native binary builds. Desktop browser interaction
 remains pending; computer control still reports no attached browser provider.
 
+The reservation push and PR CI runs both passed at `d5082a5`, including
+GitGuardian: [PR #4](https://github.com/yagoTobi/VirtualQ-Final-Version/pull/4),
+[PR run](https://github.com/yagoTobi/VirtualQ-Final-Version/actions/runs/34952801376).
+
+## Ticket scanner — 15 September 2026
+
+Verified on the Pixel 10 using Expo Go and the same synthetic QA account:
+
+- Declined camera permission and used manual entry. An unknown code produced
+  a useful error; the guest's code found Alex's September 16 ticket and explicitly
+  identified it as a future visit.
+- Inspected the final permission-denied feedback and manual fallback on the phone.
+- Granted one-time camera permission. The final version opens the preview
+  immediately; the first implementation incorrectly needed a second tap because
+  Android's permission dialog temporarily changed app foreground state.
+- Scanned the synthetic QR through the native camera callback. Django received
+  one successful lookup, the camera closed, and the screen displayed the matching
+  guest and date. “Open this pass” reached that guest's existing QR/details page.
+- Native configuration introspection includes camera permission and omits iOS
+  microphone permission and Android audio recording permission. Expo Go displays
+  its own host permission text; standalone binary permissions remain build checks.
+- Reopened Tickets after restoring the normal emulator camera. All three party
+  passes, the scanner entry and the next-plan banner fit in the Pixel viewport.
+
+| Camera declined, manual entry available | Result from native camera scan |
+| --- | --- |
+| ![Denied permission](verification/android-scanner-denied.png) | ![Scanned ticket](verification/android-scanner-result.png) |
+
+![Tickets with scanner entry and next-plan banner](verification/android-tickets-scanner.png)
+
+The camera test used the Android emulator's documented
+`-camera-back imagefile:/absolute/path/to/qa.png -no-snapshot` option. The ordinary
+virtual scene showed a calibration pattern. A 1024 × 1024 RGB image with a
+296 × 296 synthetic QR at (150, 364) placed the code inside this emulator's cropped
+camera frame. This was image input to the native camera, not an injected JavaScript
+barcode event. The automation helper timed out while capturing the successful
+transition; the subsequent API log and inspected screenshot confirmed the result.
+Afterward the device was restarted without the camera override. No AVD camera
+configuration, historical database or real visitor record changed.
+
+All 38 Django tests pass on file-backed SQLite, including date classification,
+malformed/ambiguous codes, private responses and indistinguishable foreign/unknown
+ticket errors. Types, lint and three frontend tests pass. Exports pass: seventeen
+web routes (1.8 MB main JS, 45 KB additional JS, 43 KB CSS), Android/iOS Hermes
+3.7/3.4 MB. No physical camera, iOS runtime or desktop camera walkthrough is claimed.
+
 ## Checks still required
 
-Reset confirmation, camera scanning and staff CRUD need migration and runtime
+Reset confirmation and staff CRUD need migration and runtime
 checks. Existing Django booking/authentication pages still need their shared
 visual treatment. Visitor forms need a desktop web walkthrough. Additional
 large-font, screen-reader, smaller-phone and long-history checks remain.
