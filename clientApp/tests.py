@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.test import APIClient
 from datetime import date
 from .models import CustomUser
+from django.contrib.auth.models import Permission
 
 
 class UserTest(TestCase):
@@ -88,3 +89,44 @@ class UserTest(TestCase):
         self.api_client.credentials(HTTP_AUTHORIZATION=f"Token {key}")
         self.assertEqual(self.api_client.post(reverse("logout")).status_code, 204)
         self.assertEqual(self.api_client.get(reverse("user_info")).status_code, 401)
+
+    def test_staff_capabilities_are_read_only_and_match_model_permissions(self):
+        permission = Permission.objects.get(
+            content_type__app_label="rideApp", codename="view_themeparkride",
+        )
+        self.user1.is_staff = True
+        self.user1.save(update_fields=["is_staff"])
+        self.user1.user_permissions.add(permission)
+        self.api_client.force_authenticate(user=self.user1)
+        response = self.api_client.get(reverse("user_info"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.data["is_staff"])
+        self.assertEqual(response.data["permissions"], ["rideApp.view_themeparkride"])
+
+        self.api_client.force_authenticate(user=self.user2)
+        response = self.api_client.patch(reverse("user_update"), {
+            "is_staff": True, "is_superuser": True,
+            "permissions": ["rideApp.delete_themeparkride"],
+            "user_permissions": [permission.pk],
+        }, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(response.data["is_staff"])
+        self.assertEqual(response.data["permissions"], [])
+        self.user2.refresh_from_db()
+        self.assertFalse(self.user2.is_staff)
+        self.assertFalse(self.user2.is_superuser)
+        self.assertFalse(self.user2.user_permissions.exists())
+
+    def test_signup_cannot_assign_staff_privileges(self):
+        response = self.api_client.post(reverse("signup"), {
+            "username": "visitor-only", "name": "New", "last_name": "Visitor",
+            "email": "visitor-only@example.test",
+            "password": "Good-visitor-password-2026!",
+            "is_staff": True, "is_superuser": True,
+            "permissions": ["rideApp.change_themeparkride"],
+        }, format="json")
+        self.assertEqual(response.status_code, 201)
+        user = CustomUser.objects.get(username="visitor-only")
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
+        self.assertFalse(user.user_permissions.exists())

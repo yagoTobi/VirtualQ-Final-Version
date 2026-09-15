@@ -8,11 +8,16 @@ CustomUser = get_user_model()
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     height = serializers.IntegerField(min_value=1, max_value=300, allow_null=True, required=False)
+    permissions = serializers.SerializerMethodField()
+
+    def get_permissions(self, user):
+        return sorted(user.get_all_permissions()) if user.is_staff else []
 
     class Meta:
         model = CustomUser
-        fields = ("id", "name", "last_name", "username", "email", "dob", "height")
-        read_only_fields = ("id",)
+        fields = ("id", "name", "last_name", "username", "email", "dob", "height",
+                  "is_staff", "permissions")
+        read_only_fields = ("id", "is_staff", "permissions")
 
     def validate_dob(self, value):
         if value and value > timezone.localdate():
