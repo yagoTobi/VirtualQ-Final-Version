@@ -26,12 +26,17 @@ overlay. These are runtime captures, not design mockups:
 | --- | --- | --- |
 | ![Explore](verification/android-explore.png) | ![Keyboard](verification/android-keyboard.png) | ![Account](verification/android-account.png) |
 
+| Provisional map | Compact ride details |
+| --- | --- |
+| ![Map](verification/android-map.png) | ![Ride](verification/android-detail.png) |
+
 The first native renders revealed a responsive compiler regression in
 UniWind 1.12.0 / Tailwind 4.3.3. The pinned UniWind 1.11.0 / Tailwind 4.3.2
 combination renders the phone layout correctly. The map also exposed an
 unnecessary clipped decorative label; it was removed. The large ride-detail
-image/title were reduced after visual inspection; that final sizing needs the
-next walkthrough.
+image/title were reduced after visual inspection. A fresh Metro restart and
+native walkthrough verified the corrected map, its detail link and the compact
+ride page at `247ddfc`; screenshots above show that final sizing.
 
 Automated foundation checks: clean `npm ci`, TypeScript, ESLint and
 `expo install --check` pass. Web static export passes (seven routes; 1.7 MB JS,
@@ -54,6 +59,8 @@ previously supplying a screen signal bypassed the timeout. Two Node regression
 tests cover both abort paths, an already-cancelled request, authentication headers,
 structured API errors and empty cancellation responses. These use the actual
 TypeScript client with mocked platform imports/network and add no test dependency.
+The push and PR runs also pass at `247ddfc`, including these request tests
+([PR run](https://github.com/yagoTobi/VirtualQ-Final-Version/actions/runs/34939801521)).
 
 ## Checks still required
 
