@@ -6,9 +6,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import TestCase, override_settings
 from django.utils import timezone
 from rest_framework.test import APIClient
+from rest_framework.exceptions import ValidationError as APIValidationError
 
 from adminApp.models import ParkEmployee
 from adminApp.serializers import ParkEmployeeSerializer
@@ -19,7 +21,7 @@ from storeApp.models import Product, Store
 from storeApp.serializers import ProductSerializer, StoreSerializer
 from ticketApp.models import Ticket
 from .models import ThemePark, ThemeParkArea, ThemeParkRide
-from .serializers import ThemeParkRideSerializer
+from .serializers import ThemeParkAreaSerializer, ThemeParkRideSerializer
 
 
 @override_settings(DEBUG=True)
@@ -127,3 +129,33 @@ class CatalogIntegrityTest(TestCase):
         response = self.api.delete(f"/api/parkRides/theme_park_rides/{self.ride.pk}/?confirm=true")
         self.assertEqual(response.status_code, 400, response.data)
         self.assertTrue(RideReservation.objects.filter(pk=reservation.pk).exists())
+
+    def test_saving_rechecks_an_area_moved_after_form_validation(self):
+        area = ThemeParkArea.objects.create(area_name="Empty area", park_id=self.ride.park_id)
+        serializer = StoreSerializer(self.store, data={"area_id": area.pk}, partial=True)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        area.park_id = self.other_park
+        area.save()
+        with self.assertRaises(APIValidationError):
+            serializer.save()
+        self.store.refresh_from_db()
+        self.assertNotEqual(self.store.area_id_id, area.pk)
+
+    def test_area_move_is_rechecked_after_a_child_is_added(self):
+        area = ThemeParkArea.objects.create(area_name="Empty area", park_id=self.ride.park_id)
+        serializer = ThemeParkAreaSerializer(area, data={"park_id": self.other_park.pk}, partial=True)
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        self.store.area_id = area
+        self.store.save()
+        with self.assertRaises(APIValidationError):
+            serializer.save()
+        area.refresh_from_db()
+        self.assertEqual(area.park_id_id, self.store.park_id_id)
+
+    def test_hierarchy_audit_detects_bulk_import_mismatches_without_repairing_data(self):
+        call_command("audit_park_hierarchy", stdout=StringIO())
+        Store.objects.filter(pk=self.store.pk).update(area_id=self.other_area)
+        with self.assertRaises(CommandError):
+            call_command("audit_park_hierarchy", stdout=StringIO())
+        self.store.refresh_from_db()
+        self.assertEqual(self.store.area_id_id, self.other_area.pk)
