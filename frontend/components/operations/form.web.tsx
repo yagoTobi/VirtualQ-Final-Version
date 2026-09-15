@@ -75,9 +75,15 @@ export function RelatedPicker({
         {field.label}
         {field.required ? " *" : ""}
       </Text>
-      <Button variant="outline" onPress={() => setOpen(true)}>
+      <Button
+        variant="outline"
+        isDisabled={field.resource === "areas" && park === ""}
+        onPress={() => setOpen(true)}
+      >
         <ButtonText>
-          {selection?.value === value
+          {field.resource === "areas" && park === ""
+            ? "Choose a park first"
+            : selection?.value === value
             ? selection.label
             : value
               ? `Selected record #${value} · Change`
