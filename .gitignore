@@ -3,6 +3,11 @@
 __pycache__/
 *.py[cod]
 .env.local
+.env
+.env.*
+!.env.example
+*.sqlite3
+*.sqlite3-*
 db.local.sqlite3*
 .DS_Store
 staticfiles/

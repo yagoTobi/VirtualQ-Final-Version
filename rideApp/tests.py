@@ -116,3 +116,19 @@ class LocalDemoTest(TestCase):
         self.assertRedirects(self.client.get(reverse("ticket_logout")), reverse("ticket_login"))
         self.client.force_login(get_user_model().objects.get(username="demo-admin"))
         self.assertEqual(self.client.get("/admin/").status_code, 200)
+
+    def test_catalog_writes_require_staff_and_model_permission(self):
+        from django.contrib.auth.models import Permission
+        endpoint = f"/api/parkRides/theme_park_rides/{self.ride.pk}/"
+        self.assertEqual(self.client.patch(endpoint, data='{"under_maintenance": true}',
+                                           content_type="application/json").status_code, 401)
+        self.assertEqual(self.api.patch(endpoint, {"under_maintenance": True}).status_code, 403)
+        self.user.is_staff = True
+        self.user.save()
+        self.assertEqual(self.api.patch(endpoint, {"under_maintenance": True}).status_code, 403)
+        self.user.user_permissions.add(Permission.objects.get(codename="change_themeparkride"))
+        self.assertEqual(self.api.patch(endpoint, {"under_maintenance": True}).status_code, 200)
+        self.ride.refresh_from_db()
+        self.assertTrue(self.ride.under_maintenance)
+        # A ride editor cannot read employee records without that separate permission.
+        self.assertEqual(self.api.get("/api/employees/employees/").status_code, 403)

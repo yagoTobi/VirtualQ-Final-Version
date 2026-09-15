@@ -26,6 +26,7 @@ class Command(BaseCommand):
                     "name": "Demo",
                     "last_name": "Visitor",
                     "dob": date(1990, 1, 1),
+                    "height": 170,
                     "is_staff": staff,
                     "is_superuser": staff,
                 },

@@ -22,7 +22,7 @@ class UserTest(TestCase):
         user_data = {
             "username": "testuser",
             "email": "testuser@test.com",
-            "password": "testpassword",
+            "password": "Good-visitor-password-2026!",
             "name": "Test",
             "last_name": "User",
             "dob": "1990-01-01",
@@ -63,3 +63,28 @@ class UserTest(TestCase):
             reverse("resetpassword"), {"email": "user1@test.com"}
         )
         self.assertEqual(response.status_code, 200)
+        from django.core import mail
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertIn("/reset-password/", mail.outbox[0].body)
+        self.assertNotIn("token", response.json())
+        self.assertNotIn("uid", response.json())
+        unknown = self.client.post(reverse("resetpassword"), {"email": "missing@example.test"})
+        self.assertEqual(response.json(), unknown.json())
+
+    def test_weak_password_and_future_birth_date_are_rejected(self):
+        for data in (
+            {"password": "12345678"},
+            {"dob": "2999-01-01", "password": "Good-visitor-password-2026!"},
+        ):
+            response = self.client.post(reverse("signup"), {
+                "username": "new", "name": "New", "last_name": "Visitor",
+                "email": "new@example.test", **data,
+            })
+            self.assertEqual(response.status_code, 400)
+        self.assertFalse(CustomUser.objects.filter(username="new").exists())
+
+    def test_logout_revokes_token(self):
+        key = Token.objects.get(user=self.user1).key
+        self.api_client.credentials(HTTP_AUTHORIZATION=f"Token {key}")
+        self.assertEqual(self.api_client.post(reverse("logout")).status_code, 204)
+        self.assertEqual(self.api_client.get(reverse("user_info")).status_code, 401)

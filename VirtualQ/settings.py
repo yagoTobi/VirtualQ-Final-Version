@@ -43,7 +43,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 CORS_ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ALLOWED_ORIGINS", "http://localhost:19006,http://127.0.0.1:19006"
+    "CORS_ALLOWED_ORIGINS", "http://localhost:8081,http://127.0.0.1:8081,http://localhost:19006,http://127.0.0.1:19006"
 ).split(",")
 
 ROOT_URLCONF = "VirtualQ.urls"
@@ -67,6 +67,8 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": os.environ.get("DJANGO_DATABASE_PATH", BASE_DIR / "db.local.sqlite3"),
+        "TEST": {"NAME": os.environ.get("DJANGO_TEST_DATABASE_PATH")},
+        "OPTIONS": {"transaction_mode": "IMMEDIATE", "timeout": 20},
     }
 }
 AUTH_PASSWORD_VALIDATORS = [
@@ -93,6 +95,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "virtualq@localhost"
 REST_FRAMEWORK = {
+    "DEFAULT_THROTTLE_RATES": {"auth": "30/min"},
     "DEFAULT_AUTHENTICATION_CLASSES": [
         "rest_framework.authentication.TokenAuthentication",
     ],
