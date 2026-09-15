@@ -142,7 +142,8 @@ export function Page({
                   pathname === tab.href ||
                   (tab.href === "/tickets" &&
                     (pathname.startsWith("/ticket/") ||
-                      pathname === "/book-visit")) ||
+                      pathname === "/book-visit" ||
+                      pathname === "/scan-ticket")) ||
                   (tab.href === "/account" &&
                     [
                       "/profile",

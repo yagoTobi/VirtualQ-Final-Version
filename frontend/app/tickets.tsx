@@ -45,6 +45,13 @@ function TicketList() {
         >
           <ButtonText>Book or update a visit</ButtonText>
         </Button>
+        <Button
+          size="sm"
+          variant="link"
+          onPress={() => router.push("/scan-ticket")}
+        >
+          <ButtonText>Find a ticket by code or camera</ButtonText>
+        </Button>
       </Card>
       {loading && <Loading label="Finding your tickets…" />}
       <ErrorMessage error={error} retry={reload} />
