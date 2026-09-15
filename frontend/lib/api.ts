@@ -119,3 +119,42 @@ export type Guest = {
   height: number | null;
   picture: string | null;
 };
+
+export type Reservation = {
+  reservation_id: number;
+  ticket: number;
+  ride: number;
+  date: string | null;
+  start_time: string;
+  end_time: string;
+  reservation_ticket_id: string | null;
+  validated: boolean;
+  ride_name: string;
+  ride_thumbnail: string;
+  visitor_name: string;
+  guest_number: number | null;
+  starts_at: string | null;
+  ends_at: string | null;
+  can_cancel: boolean;
+  time_zone: string;
+};
+export type BookingOptions = {
+  date: string;
+  today: string;
+  time_zone: string;
+  server_time: string;
+  visitors: {
+    ticket: number;
+    guest_number: number | null;
+    name: string;
+    height: number | null;
+    eligible: boolean;
+    reason: string;
+  }[];
+  slots: {
+    start_time: string;
+    end_time: string;
+    remaining: number;
+    conflicting_tickets: number[];
+  }[];
+};

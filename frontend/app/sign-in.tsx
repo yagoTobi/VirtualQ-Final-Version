@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import type { TextInput } from "react-native";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { Page } from "@/components/page";
 import { Field } from "@/components/field";
 import { ErrorMessage } from "@/components/feedback";
@@ -11,9 +11,11 @@ import { Text } from "@/components/ui/text";
 import { Button, ButtonText, ButtonSpinner } from "@/components/ui/button";
 import { api } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
+import { afterAuth } from "@/lib/after-auth";
 
 export default function SignIn() {
   const { signIn } = useAuth();
+  const { next } = useLocalSearchParams<{ next?: string }>();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const passwordField = useRef<TextInput>(null);
@@ -33,7 +35,7 @@ export default function SignIn() {
         },
       );
       await signIn(token);
-      router.replace("/account");
+      router.replace(afterAuth(next));
     } catch (err) {
       setError(err);
     } finally {
@@ -78,7 +80,12 @@ export default function SignIn() {
           {busy && <ButtonSpinner />}
           <ButtonText>{busy ? "Signing in…" : "Sign in"}</ButtonText>
         </Button>
-        <Button variant="outline" onPress={() => router.replace("/sign-up")}>
+        <Button
+          variant="outline"
+          onPress={() =>
+            router.replace({ pathname: "/sign-up", params: { next } })
+          }
+        >
           <ButtonText>Create an account</ButtonText>
         </Button>
         <Button
