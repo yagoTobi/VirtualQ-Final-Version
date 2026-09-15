@@ -136,6 +136,9 @@ below. `CI=1` disables Metro watching on this Mac; restart after source edits.
 
 ### Staff workspace
 
+Park → areas → attractions, venues and employees, with products under stores:
+see [relationship rules and the read-only audit command](docs/PARK_HIERARCHY.md).
+
 With the modern frontend and backend running, open
 `http://localhost:8081/operations`. The local `seed_demo` command provides the
 existing `demo-admin` staff account; its documented demo password is
