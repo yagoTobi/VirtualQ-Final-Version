@@ -51,3 +51,12 @@ Regression tests reproduce stale area moves and newly added children between
 validation and save, and confirm that the audit detects an invalid bulk update
 without silently repairing it. Transaction behavior is tested on file-backed
 SQLite with `IMMEDIATE` transactions; PostgreSQL concurrency remains unverified.
+
+## Staff form verification
+
+Safari verification confirmed that Park appears before Area, Area is disabled
+until a park is chosen, and the area picker requests only that park's areas.
+Selecting Virtual Q Demo Park then Technology Land returned both labels to the
+ride form. The unsaved test form was discarded; no catalog record was created.
+
+![Park and area selection](verification/web-park-hierarchy.png)
