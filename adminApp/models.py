@@ -1,5 +1,8 @@
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 from rideApp.models import ThemePark, ThemeParkArea
+from rideApp.validation import validate_location
 
 
 class ParkEmployee(models.Model):
@@ -36,3 +39,11 @@ class ParkEmployee(models.Model):
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    def clean(self):
+        super().clean()
+        validate_location(self, "park", "area")
+        if self.date_of_birth and self.date_of_birth > timezone.localdate():
+            raise ValidationError({"date_of_birth": "Date of birth cannot be in the future."})
+        if self.date_of_birth and self.join_date and self.join_date < self.date_of_birth:
+            raise ValidationError({"join_date": "Join date cannot be before date of birth."})

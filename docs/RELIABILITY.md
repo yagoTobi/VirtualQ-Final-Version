@@ -124,6 +124,30 @@ Accessibility (including screen-reader/focus and contrast), performance and the
 complete visual review remain pending. Foundation native evidence is recorded in
 [VERIFICATION.md](VERIFICATION.md); it is not a whole-product audit.
 
+## Operations groundwork — 15 September 2026
+
+Profile responses now expose read-only staff status and Django model permissions.
+Neither signup nor profile updates can grant staff/superuser status or permissions.
+Catalog serializers run shared model validation on the complete proposed record,
+including PATCH requests: park/area assignments, ride capacity/duration/height,
+same-day venue hours, nonnegative product prices and employee dates. Overnight
+employee shifts remain supported. Moving an area cannot strand its existing
+rides, shops, restaurants or employees in another park. Existing stored records
+and database schemas are unchanged; invalid legacy records need correction when
+edited.
+
+Catalog and employee API deletion uses Django's related-object collector. Staff
+must hold delete permission for every affected model, and cascades require
+explicit confirmation. Admitted or completed reservations prevent parent deletion
+so operational history is retained. This is an API guard; the existing Django
+admin fallback still uses its own permission and confirmation workflow.
+
+Verification: 45 backend tests pass using a disposable file-backed SQLite
+database, with no system-check errors or migration drift. The new regression
+cases cover privilege escalation, partial edits, dependent-model deletion and
+admitted history. The custom staff portal and its runtime walkthrough remain in
+progress.
+
 ## Frontend dependency review — 15 September 2026
 
 The lockfile pins Expo 57.0.23, React Native 0.86.3, gluestack core 5.0.15,
