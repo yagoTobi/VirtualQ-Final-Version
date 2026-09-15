@@ -351,12 +351,43 @@ components. This does not establish release FPS, cold-start time, iOS runtime,
 large-font coverage or complete native design parity. Pull-to-refresh is
 implemented; its gesture and error-state walkthrough remains open.
 
+## Native map checkpoint — 15 September 2026
+
+Pixel 10 / Expo Go verification covered the expanded map, compact ride panel,
+next-pass banner and five tabs. Map pin 2 → Java Jamboree → Android Back retained
+the selected pin. All rides → search “Java” → ride details → Back retained the
+query; clearing the search and selecting Maintenance showed only Looping Logic.
+Returning to the map retained pin 2.
+
+![Native map](verification/android-map-full-screen.png)
+
+The emulator was temporarily set to 840 × 1470 px at density 420
+(320 × 560 dp), first at font scale 1.3 and then 1.6. The initial check exposed
+colliding map labels and broken tab text. After the correction, tabs fit on one
+line and scrolling exposed the selected ride, maintenance status and All rides
+action. The original 1080 × 2424 px, density 420 and font scale 1.0 were restored.
+The floating Tools control in screenshots belongs to Expo Go.
+
+![Map with larger text](verification/android-map-large-text.png)
+![Reachable actions with larger text](verification/android-map-large-text-actions.png)
+
+Safari rendered the shared schematic and retained Java Jamboree after
+Map → ride details → Back to map. This check also found native-only text
+properties being forwarded to web spans; those props are now native-only and
+the web warning is gone after reload.
+
+Type checking, lint, six frontend tests and combined web/Android/iOS JavaScript
+exports passed. No dependencies were added. This does not establish native
+binary compatibility, release FPS, iOS runtime, a full six-pin visual check,
+long ride lists or a full accessibility audit.
+
 ## Checks still required
 
 Reset confirmation needs migration and runtime checks. Staff CRUD is implemented
 with the remaining browser coverage listed above. Existing Django booking/authentication pages still need their shared
 visual treatment. Visitor forms need a desktop web walkthrough. Additional
-large-font, screen-reader, smaller-phone and long-history checks remain.
+large-font and smaller-phone coverage beyond the map, screen-reader and
+long-history checks remain.
 Avatar selection is intentionally consolidated into initials until usable assets
 exist, as recorded in the migration plan. No physical device, iOS simulator,
 native release binary or app-store installation has been verified.

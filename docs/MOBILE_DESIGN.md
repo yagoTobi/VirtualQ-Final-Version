@@ -89,3 +89,23 @@ scrolling. Ride details and booking stay within the originating Explore or Map
 stack. The Map → ride → booking → Back → Back check retained the selected pin.
 This is the first refinement pass; map presentation, remaining forms, larger
 fonts and smaller phones still need further review.
+
+## Map refinement — 15 September 2026
+
+The native map now fills the available space above a compact selected-ride
+panel. The panel keeps the ride image, area, height/duration, availability and
+details action together. All rides opens the existing searchable/filterable
+ride list within the Map stack. Returning from details preserves both the list
+query and the selected map pin. Web retains its map and full list layout.
+
+The map and panel scroll together when a short screen or larger text needs more
+room. Map numbers have 48 dp targets; status is available in each pin's
+accessibility label and in the selected panel. Redundant labels below the pins
+were removed after they collided at larger text sizes.
+
+Native tabs show the shorter “Map” label. Only fixed-width tab labels cap font
+scaling at 1.2 and stay on one line; their full accessibility names are retained.
+Screen content and the next-pass banner continue to follow system font scaling.
+The 320 × 560 dp / 1.6 font-scale check confirmed that the maintenance message
+and All rides action wrap and remain reachable by scrolling. This is a
+representative layout check, not a complete screen-reader or accessibility audit.
