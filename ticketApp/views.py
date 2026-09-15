@@ -1,6 +1,3 @@
-import qrcode
-import io
-import base64
 from rest_framework import generics, viewsets, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,6 +18,7 @@ from .forms import VisitForm
 from .models import Ticket, Guest
 from .serializers import TicketSerializer, GuestSerializer
 from .services import set_visit_party
+from .qr import qr_png_base64
 
 
 # Create your views here.
@@ -61,11 +59,13 @@ class TicketQRView(APIView):
     def get(self, request, pk):
         ticket = get_object_or_404(Ticket.objects.select_related("user", "guest"), pk=pk, user=request.user)
         guest = getattr(ticket, "guest", None)
-        return Response({
+        response = Response({
             "ticket": TicketSerializer(ticket).data,
             "guest": GuestSerializer(guest).data if guest else None,
-            "image": f"data:image/png;base64,{_generate_qr_code(ticket.ticket_id)}",
+            "image": f"data:image/png;base64,{qr_png_base64(ticket.ticket_id)}",
         })
+        response["Cache-Control"] = "private, no-store"
+        return response
 
 
 @login_required
@@ -81,31 +81,13 @@ def book_visit(request):
                 return render(
                     request,
                     "ticketApp/book_visit.html",
-                    {"form": form, "qr_codes": [_generate_qr_code(ticket.ticket_id) for ticket in tickets]},
+                    {"form": form, "qr_codes": [qr_png_base64(ticket.ticket_id) for ticket in tickets]},
                 )
 
     else:
         form = VisitForm()
 
     return render(request, "ticketApp/book_visit.html", {"form": form})
-
-
-def _generate_qr_code(ticket_id):
-    qr = qrcode.QRCode(
-        version=1,
-        error_correction=qrcode.constants.ERROR_CORRECT_L,
-        box_size=10,
-        border=4,
-    )
-    qr.add_data(str(ticket_id))
-    qr.make(fit=True)
-    img = qr.make_image(fill_color="black", back_color="white")
-
-    # Convert PIL Image to base64 for use in HTML
-    buffered = io.BytesIO()
-    img.save(buffered, format="PNG")
-    img_str = base64.b64encode(buffered.getvalue()).decode()
-    return img_str
 
 
 def login_view(request):
