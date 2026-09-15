@@ -11,7 +11,7 @@ The historical database is preserved locally; migrations run against the separat
 | Milestone | Acceptance | Status |
 | --- | --- | --- |
 | Baseline | Clean checkpoint; inventory and plan committed | Recorded |
-| Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | In progress |
+| Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | Runtime/build gates passed; CI pending |
 | Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Pending |
 | Operations | All management resources below have authorized search, forms, validation and confirmations | Pending |
 | Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | Pending |
@@ -34,6 +34,15 @@ integration, secure credential storage, camera access and QR encoding are
 documented platform exceptions; buttons, forms, cards, dialogs, text, layout and
 feedback use the copied gluestack components. No invented component framework or
 second staff-only UI library.
+
+Phone-first direction (confirmed by the user): the visitor experience is designed
+and reviewed on a phone before desktop adaptation. Keep bottom navigation and the
+explore/search panel. Use compact phone content, large touch targets and native
+safe-area/keyboard behavior. The operations portal is a separate web layout.
+
+The user also requested a provisional map. Add a clearly labelled schematic park
+map with tappable rides/areas and an accessible list alternative. It must not claim
+GPS accuracy, walking directions or live location without real geographic data.
 
 ## Visitor route inventory
 
@@ -59,8 +68,9 @@ second staff-only UI library.
 Unimplemented legacy destinations (`Visit`, `Itinerary`, `MapNavigationScreen`,
 `Shops`, `Restaurants`, `QandA`, location footer) must not remain clickable
 placeholders. Plans replaces itinerary and visit links. Discovery of shops and
-restaurants can use existing catalog data; a geographic map and route planning
-require actual coordinates and remain documented future features.
+restaurants can use existing catalog data. The provisional map replaces the broken
+map destination; accurate geographic positioning and route planning require actual
+coordinates and remain documented future features.
 
 ## UI/component inventory
 
@@ -123,6 +133,14 @@ JavaScript exports passed; these are not native release builds.
 
 Each subsequent implementation commit updates this record with actual commands,
 results and limitations. Do not represent a pending or manual check as passed.
+
+Foundation checkpoint (15 September): Expo 57.0.22 / RN 0.86.3 / gluestack core
+5.0.15 / UniWind 1.11.0 / Tailwind 4.3.2. Clean install, types, lint, dependency
+alignment and web/Android/iOS JS exports pass. Pixel 10 Explore/search, map
+selection/detail navigation, keyboard-open sign-in, secure session restoration
+and sign-out were exercised. Desktop web was visually inspected during initial
+assembly; remaining forms and flow migration are still required. Evidence and
+limitations: [VERIFICATION.md](VERIFICATION.md), [MOBILE_DESIGN.md](MOBILE_DESIGN.md).
 
 ## Git and data handling
 

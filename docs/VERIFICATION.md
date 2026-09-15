@@ -1,0 +1,51 @@
+# Product verification
+
+## Foundation — 15 September 2026
+
+Environment: Pixel 10 Android Studio emulator, Android 17 / API 37, arm64,
+1080 × 2424 px, density 420; Expo Go 57.0.9. Local Django demo data only.
+Native screenshots and taps used ADB after the computer-control tool could not
+attach to the emulator window.
+
+Verified on the actual emulator:
+
+- Explore loads real API ride names, local images and maintenance status.
+- Search for “Python” reduces the list to Python Plunge.
+- Bottom navigation reaches the provisional map and account screen.
+- Map pin 2 selects Java Jamboree; its details action opens that ride.
+- Sign in as the demo visitor with the software keyboard open. Both fields and
+  the submit action remain visible, and the bottom tabs yield space to the keyboard.
+- Successful authentication closes the keyboard and displays the demo profile.
+- Force-stop and reopen Expo Go: the saved secure token restores the demo session.
+- Sign out returns to Explore with the unauthenticated header.
+
+Screenshots use seeded demo data. The floating gear is Expo Go's development
+overlay. These are runtime captures, not design mockups:
+
+| Explore | Sign in with keyboard | Restored account |
+| --- | --- | --- |
+| ![Explore](verification/android-explore.png) | ![Keyboard](verification/android-keyboard.png) | ![Account](verification/android-account.png) |
+
+The first native renders revealed a responsive compiler regression in
+UniWind 1.12.0 / Tailwind 4.3.3. The pinned UniWind 1.11.0 / Tailwind 4.3.2
+combination renders the phone layout correctly. The map also exposed an
+unnecessary clipped decorative label; it was removed. The large ride-detail
+image/title were reduced after visual inspection; that final sizing needs the
+next walkthrough.
+
+Automated foundation checks: clean `npm ci`, TypeScript, ESLint and
+`expo install --check` pass. Web static export passes (seven routes; 1.7 MB JS,
+42 KB CSS); Android/iOS Hermes exports pass (3.6/3.3 MB). These are JavaScript
+exports, not native binary builds. Source checks now exclude generated exports:
+the first parallel export/typecheck exposed a stale generated-file inclusion.
+The scoped xcode UUID override generated 100 unique valid project identifiers.
+The npm high-severity audit gate passes with three tracked moderate findings.
+CI is added in `.github/workflows/checks.yml`; GitHub results are pending.
+
+## Checks still required
+
+Registration/reset, group/profile editing, booking, reservations, cancellation,
+QR display/scanning and staff CRUD need the same native/web walkthrough after
+migration. Additional large-font, screen-reader, smaller-phone and desktop checks
+remain. No physical device, iOS simulator, native release binary or app-store
+installation has been verified.

@@ -32,7 +32,8 @@ staff access. Existing restoration flows remain covered.
 - Guest reassignment, ticket creation/reduction and staff admission workflows need
   additional validation and tests.
 - Tokens are long-lived and logout revokes all sessions sharing that user's token.
-  Native secure persistence and browser session handling are being implemented.
+  Native SecureStore persistence is verified on Pixel 10; the web uses tab-lifetime
+  sessionStorage. These do not change the server token's lifetime.
 - Configure HTTPS, production hosts, secret key, email delivery and deployment
   request limits before public deployment. No production deployment is performed.
 - Previously committed credentials/data remain in Git history. Local historical
@@ -41,7 +42,25 @@ staff access. Existing restoration flows remain covered.
 
 ## Pending review tracks
 
-Dependency advisories, native build compatibility, accessibility (including
-keyboard/focus and contrast), performance and visual review are pending the new
-frontend foundation. Report findings and verified exceptions here as they are
-resolved; do not label the whole application audited from the first pass.
+Accessibility (including screen-reader/focus and contrast), performance and the
+complete visual review remain pending. Foundation native evidence is recorded in
+[VERIFICATION.md](VERIFICATION.md); it is not a whole-product audit.
+
+## Frontend dependency review — 15 September 2026
+
+The lockfile pins Expo 57.0.22, React Native 0.86.3, gluestack core 5.0.15,
+UniWind 1.11.0 and Tailwind 4.3.2. Expo's version-alignment check passes.
+UniWind/Tailwind's subsequent combination applied desktop media rules on Android;
+keep this pair until an upstream fix is tested on the emulator.
+
+`npm audit` reports three moderate findings and no high/critical findings after a
+scoped `xcode → uuid 11.1.1` override. The remaining decode-uri-component advisory
+(GHSA-vcc3-ghjq-m6fr) is inherited through Expo Router's query-string dependency.
+Its patched major changes module exports, so forcing that override is not proven
+compatible. The audit gate fails at high severity; this moderate advisory remains
+tracked, not suppressed or described as fixed.
+
+The official copied Select includes Legend Motion, which pulls a NativeWind 4
+peer with a Tailwind 3 peer warning. The active screens use UniWind; review/remove
+unused generated components and their dependencies after the forms migration.
+Do not accept a blind forced audit fix that downgrades Expo or its router.

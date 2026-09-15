@@ -96,6 +96,40 @@ For a detailed view of the class structure and interactions, refer to the follow
 
 ![Class Diagram and structure of the project](Diagramas/png/Clases.png)
 
+## Modern app preview
+
+The migration lives in `frontend/`: Expo 57, React Native 0.86 and gluestack v5.
+It currently includes phone-first Explore/search, ride details, a provisional map,
+sign-in, secure native session restoration and sign-out. Booking, group management
+and the custom staff portal are still being migrated. See
+[the plan](docs/MODERNIZATION.md) and [native evidence](docs/VERIFICATION.md).
+
+With Python 3.12 and Node 22 installed:
+
+```sh
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python manage.py migrate
+.venv/bin/python manage.py seed_demo
+cd frontend
+npm ci
+cd ..
+make backend
+```
+
+In another terminal run `make preview-android` with Pixel 10 running in Android
+Studio, or `make preview` for web at `http://localhost:8081`. These use separate
+Expo Go SDK 57 and SDK 48 runtimes; installing one replaces the other on Android.
+The modern Android target forwards the API to `127.0.0.1:8000`. For a LAN device,
+set `EXPO_PUBLIC_API_URL` and configure Django's hosts/bind address as described
+below. `CI=1` disables Metro watching on this Mac; restart after source edits.
+
+Run `make check` and `make frontend-check`. The locked UniWind 1.11.0 /
+Tailwind 4.3.2 pairing is intentional: the subsequent compiler combination rendered
+desktop breakpoint styles on the phone during testing. Upgrade them together and
+repeat native screenshot checks. Do not apply `npm audit fix --force`; see
+[dependency findings](docs/RELIABILITY.md).
+
 ## Installation and Setup
 
 The restored local baseline uses Python 3.12, Django 5.2, Node 22, and the original Expo SDK 48 / React Native 0.71 app. See [the audit](AUDIT.md) for the next simplifications.
