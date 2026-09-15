@@ -213,6 +213,13 @@ ticket errors. Types, lint and three frontend tests pass. Exports pass: seventee
 web routes (1.8 MB main JS, 45 KB additional JS, 43 KB CSS), Android/iOS Hermes
 3.7/3.4 MB. No physical camera, iOS runtime or desktop camera walkthrough is claimed.
 
+The scanner's initial CI passed types, tests and lint but failed Expo's online
+version check after Expo 57.0.23 was published. The project now pins that patch
+and Babel preset 57.0.12. Local compatibility/audit gates and all platform exports
+pass again; a fresh Metro/Expo Go launch visually confirmed the compact Tickets
+layout. Android's Hermes bundle hash is unchanged by this patch. Native iOS
+scene-life-cycle changes are not verified by an iOS JavaScript export.
+
 ## Checks still required
 
 Reset confirmation and staff CRUD need migration and runtime
