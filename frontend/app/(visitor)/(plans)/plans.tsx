@@ -26,7 +26,7 @@ export default function Plans() {
 function PlanList() {
   const { token } = useAuth();
   const [upcoming, setUpcoming] = useState(true);
-  const { data, error, loading, reload } = useResource<Reservation[]>(
+  const { data, error, loading, refreshing, reload } = useResource<Reservation[]>(
     `/api/queue/reservations/${upcoming ? "?upcoming=true" : ""}`,
     token,
   );
@@ -63,7 +63,7 @@ function PlanList() {
           keyExtractor={(item) => String(item.reservation_id)}
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingBottom: 24 }}
-          refreshing={false}
+          refreshing={refreshing}
           onRefresh={reload}
           ListEmptyComponent={
             !error ? (

@@ -86,7 +86,7 @@ function ReservationForm() {
           })),
         ),
       });
-      router.replace("/plans");
+      router.dismissTo("/plans");
     } catch (err) {
       setError(err);
       setReview(false);
@@ -280,7 +280,7 @@ function ReservationForm() {
       <Button
         variant="link"
         onPress={() =>
-          router.replace({ pathname: "/ride/[id]", params: { id: params.id } })
+          router.navigate({ pathname: "/ride/[id]", params: { id: params.id } })
         }
       >
         <ButtonText>Back to ride details</ButtonText>

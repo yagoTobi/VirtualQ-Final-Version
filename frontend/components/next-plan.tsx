@@ -9,7 +9,15 @@ import { useResource } from "@/lib/use-resource";
 import { Reservation } from "@/lib/api";
 import { displayDate } from "@/lib/dates";
 
-export function NextPlan({ token }: { token: string }) {
+export function NextPlan({
+  token,
+  refreshKey,
+  visible,
+}: {
+  token: string;
+  refreshKey: string;
+  visible: boolean;
+}) {
   const [now, setNow] = useState(Date.now);
   useFocusEffect(
     useCallback(() => {
@@ -21,11 +29,13 @@ export function NextPlan({ token }: { token: string }) {
   const { data, error, reload } = useResource<Reservation[]>(
     "/api/queue/reservations/?upcoming=true",
     token,
+    refreshKey,
   );
   const next = data?.find(
     (item) =>
       !item.validated && item.ends_at && new Date(item.ends_at).getTime() > now,
   );
+  if (!visible) return null;
   if (error)
     return (
       <Box className="bg-card border-t border-border px-4 py-2">

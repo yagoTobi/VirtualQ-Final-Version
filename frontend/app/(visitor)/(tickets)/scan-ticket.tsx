@@ -230,7 +230,7 @@ function Scanner() {
           </Button>
         </Card>
       )}
-      <Button variant="link" onPress={() => router.replace("/tickets")}>
+      <Button variant="link" onPress={() => router.dismissTo("/tickets")}>
         <ButtonText>Back to tickets</ButtonText>
       </Button>
       <Text size="sm" className="text-muted-foreground">

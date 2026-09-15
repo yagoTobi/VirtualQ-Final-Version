@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import type { TextInput } from "react-native";
+import { Keyboard, type TextInput } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Page } from "@/components/page";
 import { Field } from "@/components/field";
@@ -33,6 +33,7 @@ export default function SignUp() {
 
   async function submit() {
     if (busy) return;
+    Keyboard.dismiss();
     if (form.password !== confirmation) {
       setError(new Error("The passwords do not match."));
       return;
@@ -56,7 +57,9 @@ export default function SignUp() {
         },
       );
       await signIn(token);
-      router.replace(afterAuth(next));
+      router.dismissTo("/account");
+      const destination = afterAuth(next);
+      if (destination !== "/account") router.navigate(destination);
     } catch (err) {
       setError(err);
     } finally {
