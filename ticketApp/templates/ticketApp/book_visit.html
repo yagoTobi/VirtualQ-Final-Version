@@ -134,12 +134,12 @@
             <h2>Your QR Codes</h2>
             {% if qr_codes %}
             <h3>Main User Ticket</h3>
-            <img class="qr-code" src="data:image/jpeg;base64,{{ qr_codes.0 }}" alt="QR Code" />
+            <img class="qr-code" src="data:image/png;base64,{{ qr_codes.0 }}" alt="QR Code" />
             {% if qr_codes|length > 1 %}
             <h3>Additional Guest Tickets</h3>
             <div class="guests-container">
                 {% for qr in qr_codes|slice:"1:" %}
-                <img class="qr-code" src="data:image/jpeg;base64,{{ qr }}" alt="QR Code" />
+                <img class="qr-code" src="data:image/png;base64,{{ qr }}" alt="QR Code" />
                 {% endfor %}
             </div>
             {% endif %}

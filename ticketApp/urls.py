@@ -5,6 +5,7 @@ from rest_framework import routers
 from .views import (
     TicketCreateView,
     TicketValidationView,
+    TicketQRView,
     book_visit,
     login_view,
     logout_view,
@@ -20,6 +21,7 @@ router.register(r"guests", GuestViewSet)
 urlpatterns = [
     path("tickets/", TicketCreateView.as_view(), name="create_ticket"),
     path("tickets/validate/", TicketValidationView.as_view(), name="validate_ticket"),
+    path("tickets/<int:pk>/qr/", TicketQRView.as_view(), name="ticket_qr"),
     path("book_visit/", book_visit, name="book_visit"),
     path("login/", login_view, name="ticket_login"),
     path("logout/", logout_view, name="ticket_logout"),
