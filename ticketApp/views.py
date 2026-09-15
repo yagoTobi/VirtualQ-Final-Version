@@ -13,6 +13,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.templatetags.static import static
+from django.utils import timezone
 
 from .forms import VisitForm
 from .models import Ticket, Guest
@@ -46,11 +47,30 @@ class TicketValidationView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        if not Ticket.objects.filter(
-            user=request.user, ticket_id=request.data.get("ticket_id")
-        ).exists():
-            raise ValidationError({"detail": "Invalid ticket"})
-        return Response({"message": "Ticket is valid"})
+        form = TicketCode(data=request.data)
+        form.is_valid(raise_exception=True)
+        try:
+            ticket = Ticket.objects.select_related("user", "guest").get(
+                user=request.user, ticket_id=form.validated_data["ticket_id"],
+            )
+        except Ticket.DoesNotExist:
+            raise ValidationError({"detail": "No park-entry ticket with this code was found in your account."})
+        except Ticket.MultipleObjectsReturned:
+            raise ValidationError({"detail": "This code matches more than one ticket. Ask the park team for help."})
+        guest = getattr(ticket, "guest", None) if ticket.guest_number else None
+        today = timezone.localdate()
+        response = Response({
+            "message": "Ticket found. Check the visit date before entry.",
+            "ticket": TicketSerializer(ticket).data,
+            "visitor_name": (guest.name if guest and guest.name else f"Guest {ticket.guest_number}") if ticket.guest_number else ticket.user.name,
+            "visit_status": "today" if ticket.date_of_visit == today else "upcoming" if ticket.date_of_visit > today else "past",
+        })
+        response["Cache-Control"] = "private, no-store"
+        return response
+
+
+class TicketCode(serializers.Serializer):
+    ticket_id = serializers.CharField(max_length=200, trim_whitespace=True)
 
 
 class TicketQRView(APIView):
