@@ -62,11 +62,58 @@ TypeScript client with mocked platform imports/network and add no test dependenc
 The push and PR runs also pass at `247ddfc`, including these request tests
 ([PR run](https://github.com/yagoTobi/VirtualQ-Final-Version/actions/runs/34939801521)).
 
+## Visitor accounts and tickets — 15 September 2026
+
+On the same Pixel emulator, using a newly created synthetic local QA account:
+
+- Registered, reached the account screen and restored the session after restarting.
+- Opened Gboard on the long registration form. Shared page-level keyboard
+  avoidance makes the final fields and Create account button reachable; bottom
+  navigation yields the keyboard space.
+- Selected September 16 in the native date picker and booked two additional
+  guests. All three passes appear in the compact ticket list without scrolling.
+- Reopened the visit with two guests prefilled and saved it again. The group
+  remained intact. Attempting to reduce it showed explicit removal/cancellation
+  counts; “Keep current group” returned to all three passes.
+- Displayed a guest QR and edited the guest's name, age and height. The refreshed
+  pass showed the new name. A separate read of this QA record confirmed persistence.
+- Decoded the actual screenshot's QR with macOS Vision and compared its payload
+  to that QA guest's stored ticket code. They match. This verifies the displayed
+  QR; it is not a camera-scanner walkthrough.
+- Updated the account holder's height and verified persistence.
+- Signed out and submitted a reset request. The UI displayed the generic inbox
+  confirmation. Local Django uses console email; production delivery was not tested.
+- Submitted the sign-in username through an Android editor key event. Focus moved
+  to Password through the native ref. The full registration “Next” sequence remains
+  part of the broader keyboard/accessibility pass.
+
+| Registration with Gboard | Compact tickets |
+| --- | --- |
+| ![Registration keyboard](verification/android-signup-keyboard.png) | ![Tickets](verification/android-tickets.png) |
+
+| Guest pass before editing | Reset request confirmation |
+| --- | --- |
+| ![QR pass](verification/android-ticket-qr.png) | ![Reset request](verification/android-reset.png) |
+
+The screenshots contain synthetic local data only. Native date picking uses
+Expo's pinned `@react-native-community/datetimepicker` 9.1.0. Web uses the browser's
+date input with gluestack labels. TypeScript, lint and two shared HTTP regression
+tests pass. The visitor web export now contains thirteen routes (1.8 MB JS,
+42 KB CSS); Android/iOS JavaScript exports passed earlier in this workflow pass.
+CI must verify the final commit again after the last form refinements.
+Desktop interaction verification is pending: computer control could not attach to
+Zen (`cgWindowNotFound`) or Safari (`timeoutReached`) in this pass. Build/export
+success does not substitute for that walkthrough.
+
+The RN performance skill and development profiling results are recorded in
+[PERFORMANCE.md](PERFORMANCE.md). No release FPS/TTI improvement is claimed.
+
 ## Checks still required
 
-Registration/reset, group/profile editing, booking, reservations, cancellation,
-QR display/scanning and staff CRUD need the same native/web walkthrough after
-migration. Additional large-font, screen-reader, smaller-phone and desktop checks
+Reset confirmation, remaining guest/avatar flows, ride reservations, cancellation,
+camera scanning and staff CRUD need migration and runtime checks. New visitor
+forms also need their desktop web walkthrough. Additional large-font,
+screen-reader, smaller-phone and desktop checks
 remain. No physical device, iOS simulator, native release binary or app-store
 installation has been verified.
 
