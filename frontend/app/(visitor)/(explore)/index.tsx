@@ -6,14 +6,14 @@ import { Heading } from "@/components/ui/heading";
 import { VStack } from "@/components/ui/vstack";
 import { HStack } from "@/components/ui/hstack";
 import { Card } from "@/components/ui/card";
-import { Badge, BadgeText } from "@/components/ui/badge";
+import { Box } from "@/components/ui/box";
 import { Button, ButtonText, ButtonIcon } from "@/components/ui/button";
 import { Input, InputField, InputSlot, InputIcon } from "@/components/ui/input";
 import { Image } from "@/components/ui/image";
 import { Pressable } from "@/components/ui/pressable";
 import {
   Icon,
-  ArrowRightIcon,
+  ChevronRightIcon,
   SearchIcon,
   GlobeIcon,
   CloseIcon,
@@ -26,6 +26,7 @@ export default function Discover() {
   const {
     data: rides,
     error,
+    refreshing,
     reload,
   } = useResource<Ride[]>("/api/parkRides/theme_park_rides/");
   const [query, setQuery] = useState("");
@@ -41,44 +42,31 @@ export default function Discover() {
           : ride.under_maintenance)),
   );
   return (
-    <Page>
-      <HStack space="md" className="bg-hero rounded-2xl p-5 items-center">
-        <VStack space="sm" className="flex-1">
-          <Text
-            size="xs"
-            bold
-            className="text-hero-muted uppercase tracking-widest"
-          >
-            Your park, at a glance
+    <Page title="Explore" refreshing={refreshing && !!rides} onRefresh={reload}>
+      <HStack space="md" className="bg-hero rounded-2xl px-4 py-3 items-center">
+        <VStack space="xs" className="flex-1">
+          <Text bold className="text-hero-foreground">
+            Your park today
           </Text>
-          <Heading size="xl" className="text-hero-foreground">
-            Make room for adventure.
-          </Heading>
           <Text size="sm" className="text-hero-muted">
             {rides
               ? `${rides.length} rides · ${rides.filter((r) => !r.under_maintenance).length} operational`
-              : "Discover what your park has to offer"}
+              : "Explore attractions"}
           </Text>
         </VStack>
         <Button
           variant="secondary"
-          size="icon"
+          size="sm"
+          className="rounded-full"
           accessibilityLabel="Open the park map"
           onPress={() => router.push("/map")}
         >
           <ButtonIcon as={GlobeIcon} />
+          <ButtonText>Map</ButtonText>
         </Button>
       </HStack>
       <VStack space="md">
-        <HStack space="md" className="items-center justify-between">
-          <Heading size="xl">Explore the park</Heading>
-          {filtered && (
-            <Text size="sm" className="text-muted-foreground">
-              {filtered.length} {filtered.length === 1 ? "ride" : "rides"}
-            </Text>
-          )}
-        </HStack>
-        <Input>
+        <Input className="rounded-xl bg-card shadow-none">
           <InputSlot>
             <InputIcon as={SearchIcon} />
           </InputSlot>
@@ -112,6 +100,7 @@ export default function Discover() {
             <Button
               key={value}
               size="sm"
+              className="rounded-full"
               variant={status === value ? "secondary" : "outline"}
               accessibilityState={{ selected: status === value }}
               onPress={() => setStatus(value)}
@@ -120,6 +109,11 @@ export default function Discover() {
             </Button>
           ))}
         </HStack>
+        {filtered && (
+          <Text size="sm" className="text-muted-foreground">
+            {filtered.length} {filtered.length === 1 ? "ride" : "rides"}
+          </Text>
+        )}
         <ErrorMessage error={error} retry={reload} />
         {!rides && !error && <Loading label="Finding your adventures…" />}
         {filtered?.length === 0 && (
@@ -137,7 +131,7 @@ export default function Discover() {
             </Button>
           </Card>
         )}
-        <VStack space="md">
+        <VStack className="overflow-hidden rounded-2xl bg-card border border-border">
           {filtered?.map((ride) => (
             <Pressable
               key={ride.ride_id}
@@ -145,41 +139,48 @@ export default function Discover() {
               accessibilityLabel={`Explore ${ride.ride_name}`}
               onPress={() =>
                 router.push({
-                  pathname: "/ride/[id]",
+                  pathname: "/(visitor)/(explore)/ride/[id]",
                   params: { id: ride.ride_id },
                 })
               }
-              className="rounded-2xl data-[focus-visible=true]:web:ring-2 data-[focus-visible=true]:web:ring-ring"
+              className="px-3 py-4 data-[active=true]:bg-accent data-[focus-visible=true]:web:ring-2 data-[focus-visible=true]:web:ring-ring"
             >
-              <Card className="p-3 rounded-2xl gap-0">
-                <HStack space="md" className="items-center">
-                  <Image
-                    source={{ uri: ride.ride_thumbnail }}
-                    alt={ride.ride_name}
-                    className="w-24 h-28 rounded-xl shrink-0"
-                    resizeMode="cover"
-                  />
-                  <VStack space="sm" className="flex-1">
-                    <Text size="xs" className="text-muted-foreground">
-                      {ride.area_name}
-                    </Text>
-                    <Heading size="lg">{ride.ride_name}</Heading>
-                    <Text size="sm" className="text-muted-foreground">
-                      {ride.ride_duration} min · {ride.height_restriction} cm
-                      min.
-                    </Text>
-                    <Badge
-                      className="self-start"
-                      variant={ride.under_maintenance ? "outline" : "secondary"}
+              <HStack space="md" className="items-center">
+                <Image
+                  source={{ uri: ride.ride_thumbnail }}
+                  alt={ride.ride_name}
+                  className="w-20 h-20 rounded-xl shrink-0"
+                  resizeMode="cover"
+                />
+                <VStack space="xs" className="flex-1">
+                  <Text size="xs" className="text-muted-foreground">
+                    {ride.area_name}
+                  </Text>
+                  <Heading size="lg">{ride.ride_name}</Heading>
+                  <Text size="sm" className="text-muted-foreground">
+                    {ride.ride_duration} min · {ride.height_restriction} cm min.
+                  </Text>
+                  <HStack space="xs" className="items-center">
+                    <Box
+                      className={`w-1.5 h-1.5 rounded-full ${ride.under_maintenance ? "bg-destructive" : "bg-success"}`}
+                    />
+                    <Text
+                      size="xs"
+                      className={
+                        ride.under_maintenance
+                          ? "text-destructive"
+                          : "text-success"
+                      }
                     >
-                      <BadgeText>
-                        {ride.under_maintenance ? "Maintenance" : "Operational"}
-                      </BadgeText>
-                    </Badge>
-                  </VStack>
-                  <Icon as={ArrowRightIcon} className="text-primary shrink-0" />
-                </HStack>
-              </Card>
+                      {ride.under_maintenance ? "Maintenance" : "Operational"}
+                    </Text>
+                  </HStack>
+                </VStack>
+                <Icon
+                  as={ChevronRightIcon}
+                  className="text-muted-foreground shrink-0"
+                />
+              </HStack>
             </Pressable>
           ))}
         </VStack>
