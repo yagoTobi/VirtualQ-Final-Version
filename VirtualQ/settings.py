@@ -67,6 +67,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": os.environ.get("DJANGO_DATABASE_PATH", BASE_DIR / "db.local.sqlite3"),
+        "TEST": {"NAME": os.environ.get("DJANGO_TEST_DATABASE_PATH")},
         "OPTIONS": {"transaction_mode": "IMMEDIATE", "timeout": 20},
     }
 }

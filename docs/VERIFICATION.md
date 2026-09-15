@@ -49,3 +49,13 @@ QR display/scanning and staff CRUD need the same native/web walkthrough after
 migration. Additional large-font, screen-reader, smaller-phone and desktop checks
 remain. No physical device, iOS simulator, native release binary or app-store
 installation has been verified.
+
+## Reservation regression pass
+
+All 22 backend tests pass with `DJANGO_TEST_DATABASE_PATH` set to a fresh temporary
+SQLite file. Coverage now includes opening/closing boundaries, same-day past
+times, absent height, cross-ride overlap, adjacent intervals, peak occupancy,
+batch rollback, released capacity, rescheduling, admission fields, preserved
+duration and malformed filters. Two concurrent connections competing for one seat
+produce exactly one successful booking. This is API/database evidence; native
+reservation forms still need migration and the subsequent walkthrough.

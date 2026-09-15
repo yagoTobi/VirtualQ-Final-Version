@@ -124,7 +124,12 @@ The modern Android target forwards the API to `127.0.0.1:8000`. For a LAN device
 set `EXPO_PUBLIC_API_URL` and configure Django's hosts/bind address as described
 below. `CI=1` disables Metro watching on this Mac; restart after source edits.
 
-Run `make check` and `make frontend-check`. The locked UniWind 1.11.0 /
+Run `make check` and `make frontend-check`. To include the SQLite concurrency
+case, use a disposable test database path:
+`DJANGO_TEST_DATABASE_PATH=/tmp/virtualq-tests.sqlite3 make check`.
+Django creates and deletes that test file; never point it at a database you want
+to keep. CI runs this file-backed concurrency check automatically.
+The locked UniWind 1.11.0 /
 Tailwind 4.3.2 pairing is intentional: the subsequent compiler combination rendered
 desktop breakpoint styles on the phone during testing. Upgrade them together and
 repeat native screenshot checks. Do not apply `npm audit fix --force`; see

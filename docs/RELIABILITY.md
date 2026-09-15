@@ -24,11 +24,33 @@ migration drift. Regression coverage includes reset non-disclosure, weak passwor
 and birth-date validation, token revocation, public write denial and model-specific
 staff access. Existing restoration flows remain covered.
 
+## Reservation correctness
+
+Booking rules now live on `RideReservation`, shared by the visitor API and Django
+admin/model saves. Creation and rescheduling check future time, ticket date,
+recorded visitor height, maintenance, duration/capacity, the full opening-hours
+interval, overlapping reservations across rides and peak concurrent occupancy.
+Adjacent bookings may share a boundary. An atomic batch rolls back if any visitor
+fails; deleting a booking releases its seat. Client API fields for admission,
+computed end time and generated code are read only.
+
+The original end time survives status edits and later ride-duration changes.
+Admitted reservations cannot be rescheduled. Malformed date/hour filters return
+400 rather than producing database parsing failures.
+
+Verification: all 22 Django tests pass against a temporary file-backed SQLite
+database, including two simultaneous API connections competing for the last seat
+(one 201, one 400, one stored reservation). CI uses a file-backed test database to
+exercise real SQLite timeout/locking behavior. The ordinary in-memory test run
+explicitly skips that one concurrency case; run with `DJANGO_TEST_DATABASE_PATH`
+pointing to a disposable test path to include it. Row-locking database behavior
+has not been exercised; SQLite remains the supported local database.
+
+Newly seeded demo profiles include height. Existing profiles are preserved and
+must supply missing height before booking a ride with a height restriction.
+
 ## Still open
 
-- Reservation capacity, overlap, opening hours and edit validation need a common
-  transactional path. SQLite is configured to begin atomic writes with IMMEDIATE
-  locking; concurrent reservation tests are still required.
 - Guest reassignment, ticket creation/reduction and staff admission workflows need
   additional validation and tests.
 - Tokens are long-lived and logout revokes all sessions sharing that user's token.
