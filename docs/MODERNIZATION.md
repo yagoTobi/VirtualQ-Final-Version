@@ -140,6 +140,7 @@ Python dependencies are explicitly pinned in `requirements.txt`.
 | Tickets | Ticket / tickets | User/date/party position; generated code remains read only |
 | Guests | Guest / tickets | Ticket linkage, name/age/height; generated visit date read only |
 | Reservations | RideReservation / queue | Search/filter, valid booking/edit/cancel and admission validation |
+| Visitor accounts | CustomUser / operations | Read-only name/username/email lookup for visit assistance |
 
 Employee records are not automatically authentication accounts. Django model
 permissions control management access; `is_staff` alone must not authorize every
@@ -174,6 +175,23 @@ selection/detail navigation, keyboard-open sign-in, secure session restoration
 and sign-out were exercised. Desktop web was visually inspected during initial
 assembly; remaining forms and flow migration are still required. Evidence and
 limitations: [VERIFICATION.md](VERIFICATION.md), [MOBILE_DESIGN.md](MOBILE_DESIGN.md).
+
+## Operations checkpoint
+
+15 September: `/operations` is a separate web workspace
+using the shared gluestack components and semantic tokens. Its server APIs cover
+the inventory above with paginated search/filtering, model permissions, form
+metadata, confirmation previews and atomic admission. The visitor app retains
+native tabs and detail transitions. Browser-specific modal primitives avoid a
+Safari exit-animation hang; authentication wraps the gluestack overlay host so
+nested dialogs retain the session.
+
+The common staff sign-in, create/validation/discard/save flow and authenticated
+relationship picker were exercised in Safari. Pixel session restoration,
+Explore, map and retained ticket selection were rechecked. There are 54 passing
+backend tests and six frontend tests. Full row-edit/delete/admission browser
+coverage, smaller web layouts, the legacy Django pages and the remaining audit
+tracks are still required; this checkpoint does not close the full objective.
 
 ## Git and data handling
 

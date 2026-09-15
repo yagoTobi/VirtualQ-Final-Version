@@ -3,6 +3,7 @@ from rest_framework import viewsets
 from django_filters import rest_framework as filters
 from .models import ThemePark, ThemeParkArea, ThemeParkRide
 from VirtualQ.permissions import PublicReadStaffWrite
+from VirtualQ.deletion import SafeDestroyMixin
 
 from .serializers import (
     ThemeParkSerializer,
@@ -20,19 +21,19 @@ class ThemeParkRideFilter(filters.FilterSet):
         fields = ["ride_type", "area_id"]
 
 
-class ThemeParkViewSet(viewsets.ModelViewSet):
+class ThemeParkViewSet(SafeDestroyMixin, viewsets.ModelViewSet):
     permission_classes = [PublicReadStaffWrite]
     queryset = ThemePark.objects.all()
     serializer_class = ThemeParkSerializer
 
 
-class ThemeParkAreaViewSet(viewsets.ModelViewSet):
+class ThemeParkAreaViewSet(SafeDestroyMixin, viewsets.ModelViewSet):
     permission_classes = [PublicReadStaffWrite]
-    queryset = ThemeParkArea.objects.all()
+    queryset = ThemeParkArea.objects.select_related("park_id")
     serializer_class = ThemeParkAreaSerializer
 
 
-class ThemeParkRideViewSet(viewsets.ModelViewSet):
+class ThemeParkRideViewSet(SafeDestroyMixin, viewsets.ModelViewSet):
     permission_classes = [PublicReadStaffWrite]
     queryset = ThemeParkRide.objects.select_related("area_id", "park_id").all()
     serializer_class = ThemeParkRideSerializer

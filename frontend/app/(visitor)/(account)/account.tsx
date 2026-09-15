@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Platform } from "react-native";
 import { Redirect, router } from "expo-router";
 import { Page } from "@/components/page";
 import { Loading, ErrorMessage } from "@/components/feedback";
@@ -33,6 +34,14 @@ export default function Account() {
         <Button variant="outline" onPress={() => router.push("/profile")}>
           <ButtonText>Edit your details</ButtonText>
         </Button>
+        {Platform.OS === "web" && user.is_staff && (
+          <Button
+            variant="secondary"
+            onPress={() => router.navigate("/operations")}
+          >
+            <ButtonText>Open staff portal</ButtonText>
+          </Button>
+        )}
         <ErrorMessage error={error} />
         <Button
           variant="outline"

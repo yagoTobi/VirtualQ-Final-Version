@@ -1,5 +1,6 @@
 from django.db import models
 from rideApp.models import ThemePark, ThemeParkArea
+from rideApp.validation import opening_duration, validate_location
 
 #Definición de selección 
 class RestaurantType(models.Model):
@@ -42,3 +43,8 @@ class Restaurant(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        super().clean()
+        validate_location(self, "park", "area")
+        opening_duration(self)
