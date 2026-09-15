@@ -5,6 +5,8 @@ import { HStack } from "@/components/ui/hstack";
 import { VStack } from "@/components/ui/vstack";
 import { Text } from "@/components/ui/text";
 import { Button, ButtonText } from "@/components/ui/button";
+import { Pressable } from "@/components/ui/pressable";
+import { Icon, ChevronRightIcon } from "@/components/ui/icon";
 import { useResource } from "@/lib/use-resource";
 import { Reservation } from "@/lib/api";
 import { displayDate } from "@/lib/dates";
@@ -46,37 +48,34 @@ export function NextPlan({
     );
   if (!next) return null;
   return (
-    <Box className="bg-hero px-4 py-3">
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`Open next ride pass: ${next.ride_name}, ${displayDate(next.date)}, ${next.start_time.slice(0, 5)} ${next.time_zone}`}
+      onPress={() =>
+        router.push({
+          pathname: "/reservation/[id]",
+          params: { id: next.reservation_id },
+        })
+      }
+      className="bg-hero px-4 py-3 min-h-16 data-[active=true]:opacity-80"
+    >
       <HStack space="md" className="w-full max-w-lg self-center items-center">
         <VStack space="xs" className="flex-1">
-          <Text size="xs" className="text-hero-muted">
-            NEXT UP · {next.start_time.slice(0, 5)} {next.time_zone}
-          </Text>
           <Text
             bold
             size="sm"
             numberOfLines={1}
             className="text-hero-foreground"
           >
-            {next.ride_name}
+            Next · {next.ride_name}
           </Text>
           <Text size="xs" className="text-hero-muted">
-            {displayDate(next.date)}
+            {displayDate(next.date)} · {next.start_time.slice(0, 5)}{" "}
+            {next.time_zone}
           </Text>
         </VStack>
-        <Button
-          size="sm"
-          variant="secondary"
-          onPress={() =>
-            router.push({
-              pathname: "/reservation/[id]",
-              params: { id: next.reservation_id },
-            })
-          }
-        >
-          <ButtonText>Open pass</ButtonText>
-        </Button>
+        <Icon as={ChevronRightIcon} className="text-hero-foreground" />
       </HStack>
-    </Box>
+    </Pressable>
   );
 }

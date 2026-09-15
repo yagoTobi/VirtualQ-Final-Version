@@ -1,4 +1,5 @@
 import { useLocalSearchParams, router } from "expo-router";
+import { Platform } from "react-native";
 import { Page } from "@/components/page";
 import { ErrorMessage, Loading } from "@/components/feedback";
 import { Ride } from "@/lib/api";
@@ -12,7 +13,7 @@ import { Card } from "@/components/ui/card";
 import { Badge, BadgeText } from "@/components/ui/badge";
 import { Button, ButtonText } from "@/components/ui/button";
 
-export default function RideDetail() {
+export default function RideDetail({ fromMap = false }: { fromMap?: boolean }) {
   const { id } = useLocalSearchParams<{ id: string }>();
   const {
     data: ride,
@@ -21,13 +22,17 @@ export default function RideDetail() {
   } = useResource<Ride>(`/api/parkRides/theme_park_rides/${id}/`);
   return (
     <Page>
-      <Button
-        variant="link"
-        className="self-start"
-        onPress={() => router.dismissTo("/")}
-      >
-        <ButtonText>← All adventures</ButtonText>
-      </Button>
+      {Platform.OS === "web" && (
+        <Button
+          variant="link"
+          className="self-start"
+          onPress={() => router.dismissTo(fromMap ? "/map" : "/")}
+        >
+          <ButtonText>
+            {fromMap ? "← Back to map" : "← All adventures"}
+          </ButtonText>
+        </Button>
+      )}
       <ErrorMessage error={error} retry={load} />
       {!ride && !error && <Loading />}
       {ride && (
@@ -86,7 +91,12 @@ export default function RideDetail() {
               <Button
                 isDisabled={ride.under_maintenance}
                 onPress={() =>
-                  router.push({ pathname: "/reserve/[id]", params: { id } })
+                  router.push({
+                    pathname: fromMap
+                      ? "/(visitor)/(map)/reserve/[id]"
+                      : "/(visitor)/(explore)/reserve/[id]",
+                    params: { id },
+                  })
                 }
               >
                 <ButtonText>

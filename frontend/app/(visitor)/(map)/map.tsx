@@ -149,7 +149,7 @@ export default function ParkMap() {
                   accessibilityLabel={`Explore ${active.ride_name}`}
                   onPress={() =>
                     router.push({
-                      pathname: "/ride/[id]",
+                      pathname: "/(visitor)/(map)/ride/[id]",
                       params: { id: active.ride_id },
                     })
                   }
@@ -179,7 +179,7 @@ export default function ParkMap() {
               className="justify-between"
               onPress={() =>
                 router.push({
-                  pathname: "/ride/[id]",
+                  pathname: "/(visitor)/(map)/ride/[id]",
                   params: { id: ride.ride_id },
                 })
               }

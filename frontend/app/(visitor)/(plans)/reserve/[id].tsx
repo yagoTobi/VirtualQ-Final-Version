@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Platform } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { Page } from "@/components/page";
 import { RequireAuth } from "@/components/require-auth";
@@ -24,15 +25,15 @@ import { useAuth } from "@/lib/auth";
 import { useResource } from "@/lib/use-resource";
 import { displayDate, visitDate } from "@/lib/dates";
 
-export default function Reserve() {
+export default function Reserve({ fromMap = false }: { fromMap?: boolean }) {
   return (
     <RequireAuth>
-      <ReservationForm />
+      <ReservationForm fromMap={fromMap} />
     </RequireAuth>
   );
 }
 
-function ReservationForm() {
+function ReservationForm({ fromMap }: { fromMap: boolean }) {
   const params = useLocalSearchParams<{ id: string; date?: string }>();
   const { token } = useAuth();
   const [date, setDate] = useState(visitDate(params.date));
@@ -60,15 +61,16 @@ function ReservationForm() {
     slot.remaining >= selected.length &&
     selectedIds.every((id) => !slot.conflicting_tickets.includes(id));
   const slot = data?.slots.find((item) => item.start_time === time);
-  const visibleSlots = data?.slots.filter(
-    (item) =>
-      period === "all" ||
-      (period === "morning"
-        ? item.start_time < "12:00"
-        : period === "afternoon"
-          ? item.start_time >= "12:00" && item.start_time < "17:00"
-          : item.start_time >= "17:00"),
-  ) || [];
+  const visibleSlots =
+    data?.slots.filter(
+      (item) =>
+        period === "all" ||
+        (period === "morning"
+          ? item.start_time < "12:00"
+          : period === "afternoon"
+            ? item.start_time >= "12:00" && item.start_time < "17:00"
+            : item.start_time >= "17:00"),
+    ) || [];
   const ready = !!slot && fits(slot) && !ride.data?.under_maintenance;
   async function book() {
     if (busy || !ready) return;
@@ -226,22 +228,22 @@ function ReservationForm() {
               </HStack>
               <Box className="flex-row flex-wrap gap-2">
                 {visibleSlots.map((slot) => (
-                    <Button
-                      key={slot.start_time}
-                      size="sm"
-                      variant={time === slot.start_time ? "default" : "outline"}
-                      isDisabled={!fits(slot) || busy}
-                      accessibilityState={{
-                        selected: time === slot.start_time,
-                      }}
-                      accessibilityLabel={`${slot.start_time.slice(0, 5)}, ${fits(slot) ? "available" : "unavailable for this group"}`}
-                      onPress={() => {
-                        setTime(slot.start_time);
-                        setReview(false);
-                      }}
-                    >
-                      <ButtonText>{slot.start_time.slice(0, 5)}</ButtonText>
-                    </Button>
+                  <Button
+                    key={slot.start_time}
+                    size="sm"
+                    variant={time === slot.start_time ? "default" : "outline"}
+                    isDisabled={!fits(slot) || busy}
+                    accessibilityState={{
+                      selected: time === slot.start_time,
+                    }}
+                    accessibilityLabel={`${slot.start_time.slice(0, 5)}, ${fits(slot) ? "available" : "unavailable for this group"}`}
+                    onPress={() => {
+                      setTime(slot.start_time);
+                      setReview(false);
+                    }}
+                  >
+                    <ButtonText>{slot.start_time.slice(0, 5)}</ButtonText>
+                  </Button>
                 ))}
               </Box>
               {!visibleSlots.length && (
@@ -277,14 +279,21 @@ function ReservationForm() {
           )}
         </Card>
       )}
-      <Button
-        variant="link"
-        onPress={() =>
-          router.navigate({ pathname: "/ride/[id]", params: { id: params.id } })
-        }
-      >
-        <ButtonText>Back to ride details</ButtonText>
-      </Button>
+      {Platform.OS === "web" && (
+        <Button
+          variant="link"
+          onPress={() =>
+            router.dismissTo({
+              pathname: fromMap
+                ? "/(visitor)/(map)/ride/[id]"
+                : "/(visitor)/(explore)/ride/[id]",
+              params: { id: params.id },
+            })
+          }
+        >
+          <ButtonText>Back to ride details</ButtonText>
+        </Button>
+      )}
     </Page>
   );
 }

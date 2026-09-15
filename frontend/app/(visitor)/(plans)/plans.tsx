@@ -26,16 +26,11 @@ export default function Plans() {
 function PlanList() {
   const { token } = useAuth();
   const [upcoming, setUpcoming] = useState(true);
-  const { data, error, loading, refreshing, reload } = useResource<Reservation[]>(
-    `/api/queue/reservations/${upcoming ? "?upcoming=true" : ""}`,
-    token,
-  );
+  const { data, error, loading, refreshing, reload } = useResource<
+    Reservation[]
+  >(`/api/queue/reservations/${upcoming ? "?upcoming=true" : ""}`, token);
   return (
-    <Page
-      title="Your park plans"
-      subtitle="Everyone’s rides, in one place."
-      scroll={false}
-    >
+    <Page title="Plans" scroll={false}>
       <HStack space="sm">
         <Button
           size="sm"

@@ -21,10 +21,7 @@ export default function Account() {
     );
   if (!user) return <Redirect href="/sign-in" />;
   return (
-    <Page
-      title={`Hello, ${user.name}.`}
-      subtitle="Your next great day out starts here."
-    >
+    <Page title="You">
       <Card className="max-w-xl">
         <Heading size="xl">Your account</Heading>
         <Text>
