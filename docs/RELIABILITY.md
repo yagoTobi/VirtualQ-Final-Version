@@ -49,9 +49,25 @@ has not been exercised; SQLite remains the supported local database.
 Newly seeded demo profiles include height. Existing profiles are preserved and
 must supply missing height before booking a ride with a height restriction.
 
+## Visit tickets and guest details
+
+Visit creation and the existing Django booking page now call one transactional
+service. Repeating a booking reuses the same party positions, ticket codes and
+guest details. Reducing a party requires explicit confirmation with affected
+ticket/reservation counts; admitted reservations prevent removal. Account locking
+also covers two requests for a new visit with no existing ticket rows.
+
+Guest updates cannot move a guest to another ticket. Height and age ranges are
+validated. Malformed ticket date/guest ID filters return 400. The PNG QR endpoint
+and its ticket/guest details are available only to the ticket owner.
+
+Verification: 31 Django tests pass with a temporary file-backed SQLite database,
+including concurrent repeat bookings, removal/cascade rules, API/web parity,
+guest validation and QR ownership. No historical database or migration changed.
+
 ## Still open
 
-- Guest reassignment, ticket creation/reduction and staff admission workflows need
+- Staff ticket management/admission and visitor cancellation after admission need
   additional validation and tests.
 - Tokens are long-lived and logout revokes all sessions sharing that user's token.
   Native SecureStore persistence is verified on Pixel 10; the web uses tab-lifetime

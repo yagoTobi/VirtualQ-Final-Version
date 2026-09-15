@@ -100,8 +100,10 @@ For a detailed view of the class structure and interactions, refer to the follow
 
 The migration lives in `frontend/`: Expo 57, React Native 0.86 and gluestack v5.
 It currently includes phone-first Explore/search, ride details, a provisional map,
-sign-in, secure native session restoration and sign-out. Booking, group management
-and the custom staff portal are still being migrated. See
+registration/sign-in/reset requests, profile editing, visit booking, ticket QR
+passes and guest details. Secure native sessions survive restarts. Ride
+reservations, scanning, remaining visitor flows and the custom staff portal are
+still being migrated. See
 [the plan](docs/MODERNIZATION.md) and [native evidence](docs/VERIFICATION.md).
 
 With Python 3.12 and Node 22 installed:
@@ -120,12 +122,14 @@ make backend
 In another terminal run `make preview-android` with Pixel 10 running in Android
 Studio, or `make preview` for web at `http://localhost:8081`. These use separate
 Expo Go SDK 57 and SDK 48 runtimes; installing one replaces the other on Android.
-The modern Android target forwards the API to `127.0.0.1:8000`. For a LAN device,
+The modern Android target forwards the API and Metro ports and prefers IPv4 for
+localhost; an IPv6-only Metro listener failed the emulator's IPv4 connection.
+For a LAN device,
 set `EXPO_PUBLIC_API_URL` and configure Django's hosts/bind address as described
 below. `CI=1` disables Metro watching on this Mac; restart after source edits.
 
 Run `make check` and `make frontend-check`. To include the SQLite concurrency
-case, use a disposable test database path:
+cases, use a disposable test database path:
 `DJANGO_TEST_DATABASE_PATH=/tmp/virtualq-tests.sqlite3 make check`.
 Django creates and deletes that test file; never point it at a database you want
 to keep. CI runs this file-backed concurrency check automatically.

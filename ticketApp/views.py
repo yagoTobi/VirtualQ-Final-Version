@@ -1,7 +1,7 @@
 import qrcode
 import io
 import base64
-from rest_framework import generics, viewsets
+from rest_framework import generics, viewsets, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
@@ -9,20 +9,18 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.decorators import api_view
 from rest_framework import status
 
-from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import render, redirect
+from django.core.exceptions import ObjectDoesNotExist, ValidationError as ModelValidationError
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.templatetags.static import static
-from django.utils.dateparse import parse_date
-
-from clientApp.models import CustomUser
 
 from .forms import VisitForm
 from .models import Ticket, Guest
 from .serializers import TicketSerializer, GuestSerializer
+from .services import set_visit_party
 
 
 # Create your views here.
@@ -31,15 +29,19 @@ class TicketCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        ticket_id = request.data.get("ticket_id")
-        username = request.data.get("user")
-        user = CustomUser.objects.get(
-            username=username
-        )  # Get User object from username
+        form = VisitForm(request.data)
+        if not form.is_valid():
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
         try:
-            ticket = Ticket.objects.get(user=user)
-        except Ticket.DoesNotExist:
-            raise ValidationError("Ticket does not exist")
+            tickets, created = set_visit_party(request.user, **form.cleaned_data)
+        except ModelValidationError as error:
+            raise ValidationError(
+                error.message_dict if hasattr(error, "message_dict") else error.messages
+            ) from error
+        return Response(
+            TicketSerializer(tickets, many=True).data,
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
 
 
 class TicketValidationView(APIView):
@@ -53,52 +55,34 @@ class TicketValidationView(APIView):
         return Response({"message": "Ticket is valid"})
 
 
+class TicketQRView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        ticket = get_object_or_404(Ticket.objects.select_related("user", "guest"), pk=pk, user=request.user)
+        guest = getattr(ticket, "guest", None)
+        return Response({
+            "ticket": TicketSerializer(ticket).data,
+            "guest": GuestSerializer(guest).data if guest else None,
+            "image": f"data:image/png;base64,{_generate_qr_code(ticket.ticket_id)}",
+        })
+
+
 @login_required
 def book_visit(request):
     if request.method == "POST":
         form = VisitForm(request.POST)
         if form.is_valid():
-            date_of_visit = form.cleaned_data["date_of_visit"]
-            additional_guests = form.cleaned_data["additional_guests"]
-            additional_guests = int(additional_guests) if additional_guests else 0
-
-            # Get existing tickets for the same day
-            existing_tickets = Ticket.objects.filter(
-                user=request.user, date_of_visit=date_of_visit
-            )
-
-            # If there are more existing tickets than needed, delete the extras
-            if existing_tickets.count() > additional_guests + 1:  # +1 for the main user
-                tickets_to_delete = existing_tickets.filter(
-                    guest_number__gt=additional_guests
+            try:
+                tickets, _ = set_visit_party(request.user, **form.cleaned_data)
+            except ModelValidationError as error:
+                form.add_error(None, error)
+            else:
+                return render(
+                    request,
+                    "ticketApp/book_visit.html",
+                    {"form": form, "qr_codes": [_generate_qr_code(ticket.ticket_id) for ticket in tickets]},
                 )
-                tickets_to_delete.delete()
-
-            # If there are fewer existing tickets than needed, create the additional ones
-            elif (
-                existing_tickets.count() < additional_guests + 1
-            ):  # +1 for the main user
-                for i in range(
-                    existing_tickets.count(), additional_guests + 1
-                ):  # +1 for the main user
-                    guest_ticket = Ticket.objects.create(
-                        user=request.user,
-                        date_of_visit=date_of_visit,
-                        guest_number=i,
-                    )
-
-            # Generate QR codes for all tickets
-            qr_codes = []
-            for ticket in Ticket.objects.filter(
-                user=request.user, date_of_visit=date_of_visit
-            ):
-                qr_codes.append(_generate_qr_code(ticket.ticket_id))
-
-            return render(
-                request,
-                "ticketApp/book_visit.html",
-                {"form": form, "qr_codes": qr_codes},
-            )
 
     else:
         form = VisitForm()
@@ -119,7 +103,7 @@ def _generate_qr_code(ticket_id):
 
     # Convert PIL Image to base64 for use in HTML
     buffered = io.BytesIO()
-    img.save(buffered, format="JPEG")
+    img.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
     return img_str
 
@@ -149,14 +133,11 @@ class UserTicketsListAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        user = self.request.user
-        date_of_visit_str = self.request.query_params.get("date_of_visit", None)
-        date_of_visit = parse_date(date_of_visit_str) if date_of_visit_str else None
-
-        if date_of_visit:
-            return Ticket.objects.filter(user=user, date_of_visit=date_of_visit)
-        else:
-            return Ticket.objects.filter(user=user)
+        tickets = Ticket.objects.filter(user=self.request.user).select_related("user")
+        if "date_of_visit" in self.request.query_params:
+            date = serializers.DateField().run_validation(self.request.query_params["date_of_visit"])
+            tickets = tickets.filter(date_of_visit=date)
+        return tickets.order_by("-date_of_visit", "guest_number", "pk")
 
 
 class GuestViewSet(viewsets.ModelViewSet):
@@ -169,8 +150,8 @@ class GuestViewSet(viewsets.ModelViewSet):
 
 @api_view(["GET"])
 def get_guest_by_ticket(request):
-    ticket_id = request.GET.get("ticket_id", None)
-    if ticket_id is not None:
+    ticket_id = serializers.IntegerField(min_value=1).run_validation(request.GET.get("ticket_id"))
+    if ticket_id:
         try:
             guest = Guest.objects.get(ticket__id=ticket_id, ticket__user=request.user)
             serializer = GuestSerializer(guest)
@@ -180,10 +161,6 @@ def get_guest_by_ticket(request):
                 {"error": "No guest found for this ticket id"},
                 status=status.HTTP_404_NOT_FOUND,
             )
-    else:
-        return Response(
-            {"error": "No ticket_id provided"}, status=status.HTTP_400_BAD_REQUEST
-        )
 
 
 class AvatarURLsView(APIView):

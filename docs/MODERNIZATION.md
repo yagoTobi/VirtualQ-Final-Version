@@ -1,6 +1,8 @@
 # VirtualQ modernization
 
 Baseline: `566cdc5` on `main`. Work branch: `codex/virtualq-modernization`.
+Foundation review: PR #2. Visitor workflow work continues on
+`codex/virtualq-visitor-workflows`, based on that foundation.
 The restored Expo 48 client remains runnable until its replacement passes the
 Android and web foundation gates. Django and its existing model identities stay.
 The historical database is preserved locally; migrations run against the separate
@@ -30,15 +32,25 @@ Verify exact installed versions before declaring the foundation compatible.
 Remove `userApp-React-Native/` only after functional parity is verified.
 
 UniWind avoids a second CSS pipeline. Native navigation, safe-area/keyboard
-integration, secure credential storage, camera access and QR encoding are
+integration, secure credential storage, camera access, date pickers and QR encoding are
 documented platform exceptions; buttons, forms, cards, dialogs, text, layout and
 feedback use the copied gluestack components. No invented component framework or
 second staff-only UI library.
+
+The date control uses Expo's supported native picker and the browser's date
+input, with gluestack labels/buttons. QR PNGs come from Django's existing encoder.
+Core 5.0.15's input ref declaration names props instead of the forwarded native
+TextInput instance; the local copied input corrects that type boundary for
+keyboard focus. Data requests refresh on route focus and abort on blur.
 
 Phone-first direction (confirmed by the user): the visitor experience is designed
 and reviewed on a phone before desktop adaptation. Keep bottom navigation and the
 explore/search panel. Use compact phone content, large touch targets and native
 safe-area/keyboard behavior. The operations portal is a separate web layout.
+
+Also apply the user-requested `react-native-best-practices` skill. Track native
+render/bundle measurements in [PERFORMANCE.md](PERFORMANCE.md); optimize measured
+problems and re-measure, keeping development traces separate from release metrics.
 
 The user also requested a provisional map. Add a clearly labelled schematic park
 map with tappable rides/areas and an accessible list alternative. It must not claim

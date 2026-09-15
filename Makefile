@@ -23,7 +23,8 @@ preview:
 
 preview-android:
 	"$(ANDROID_SDK)/platform-tools/adb" -e reverse tcp:8000 tcp:8000
-	cd frontend && PATH="$(CURDIR)/.local/node/node_modules/.bin:$(ANDROID_SDK)/platform-tools:$$PATH" ANDROID_HOME="$(ANDROID_SDK)" EXPO_PUBLIC_API_URL=http://127.0.0.1:8000 CI=1 npm start -- --android --localhost --port 8081 --clear
+	"$(ANDROID_SDK)/platform-tools/adb" -e reverse tcp:8081 tcp:8081
+	cd frontend && PATH="$(CURDIR)/.local/node/node_modules/.bin:$(ANDROID_SDK)/platform-tools:$$PATH" NODE_OPTIONS="--dns-result-order=ipv4first" ANDROID_HOME="$(ANDROID_SDK)" EXPO_PUBLIC_API_URL=http://127.0.0.1:8000 CI=1 npm start -- --android --localhost --port 8081 --clear
 
 frontend-check:
 	cd frontend && PATH="$(CURDIR)/.local/node/node_modules/.bin:$$PATH" npm run typecheck

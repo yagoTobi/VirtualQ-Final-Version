@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import { api } from "./api";
 
 export function useResource<T>(path: string, token?: string | null) {
@@ -10,19 +11,22 @@ export function useResource<T>(path: string, token?: string | null) {
     data: T | null;
     error: unknown;
   } | null>(null);
-  useEffect(() => {
-    const controller = new AbortController();
-    api<T>(path, token, { signal: controller.signal })
-      .then((data) => {
-        if (!controller.signal.aborted)
-          setResult({ path, token, revision, data, error: null });
-      })
-      .catch((error) => {
-        if (!controller.signal.aborted)
-          setResult({ path, token, revision, data: null, error });
-      });
-    return () => controller.abort();
-  }, [path, token, revision]);
+  useFocusEffect(
+    useCallback(() => {
+      const controller = new AbortController();
+      setResult(null);
+      api<T>(path, token, { signal: controller.signal })
+        .then((data) => {
+          if (!controller.signal.aborted)
+            setResult({ path, token, revision, data, error: null });
+        })
+        .catch((error) => {
+          if (!controller.signal.aborted)
+            setResult({ path, token, revision, data: null, error });
+        });
+      return () => controller.abort();
+    }, [path, token, revision]),
+  );
   const current =
     result?.path === path &&
     result.token === token &&

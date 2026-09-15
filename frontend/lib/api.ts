@@ -103,3 +103,19 @@ export type Ride = {
   under_maintenance: boolean;
   [key: string]: unknown;
 };
+
+export type Ticket = {
+  id: number;
+  user: string;
+  date_of_visit: string;
+  guest_number: number | null;
+  ticket_id: string;
+};
+export type Guest = {
+  guest_id: number;
+  ticket: number;
+  name: string | null;
+  age: number | null;
+  height: number | null;
+  picture: string | null;
+};

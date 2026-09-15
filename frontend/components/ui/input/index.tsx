@@ -87,23 +87,28 @@ const InputSlot = React.forwardRef<
   );
 });
 
-type IInputFieldProps = React.ComponentProps<typeof UIInput.Input> &
+type IInputFieldProps = React.ComponentPropsWithoutRef<typeof UIInput.Input> &
   VariantProps<typeof inputFieldStyle> & { className?: string };
 
-const InputField = React.forwardRef<
-  React.ComponentRef<typeof UIInput.Input>,
-  IInputFieldProps
->(function InputField({ className, ...props }, ref) {
-  return (
-    <UIInput.Input
-      ref={ref}
-      {...props}
-      className={inputFieldStyle({
-        class: className,
-      })}
-    />
-  );
-});
+// Core 5.0.15 types this ref as TextInputProps; Input.jsx forwards the actual
+// TextInput instance through mergeRefs. Correct that boundary for native focus().
+const NativeInputField = UIInput.Input as React.ForwardRefExoticComponent<
+  IInputFieldProps & React.RefAttributes<TextInput>
+>;
+
+const InputField = React.forwardRef<TextInput, IInputFieldProps>(
+  function InputField({ className, ...props }, ref) {
+    return (
+      <NativeInputField
+        ref={ref}
+        {...props}
+        className={inputFieldStyle({
+          class: className,
+        })}
+      />
+    );
+  },
+);
 
 Input.displayName = "Input";
 InputIcon.displayName = "InputIcon";
