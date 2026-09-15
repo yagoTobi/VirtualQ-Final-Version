@@ -22,7 +22,7 @@ import { ErrorMessage, Loading } from "@/components/feedback";
 import { Ride } from "@/lib/api";
 import { useResource } from "@/lib/use-resource";
 
-export default function Discover() {
+export default function Discover({ fromMap = false }: { fromMap?: boolean }) {
   const {
     data: rides,
     error,
@@ -42,29 +42,38 @@ export default function Discover() {
           : ride.under_maintenance)),
   );
   return (
-    <Page title="Explore" refreshing={refreshing && !!rides} onRefresh={reload}>
-      <HStack space="md" className="bg-hero rounded-2xl px-4 py-3 items-center">
-        <VStack space="xs" className="flex-1">
-          <Text bold className="text-hero-foreground">
-            Your park today
-          </Text>
-          <Text size="sm" className="text-hero-muted">
-            {rides
-              ? `${rides.length} rides · ${rides.filter((r) => !r.under_maintenance).length} operational`
-              : "Explore attractions"}
-          </Text>
-        </VStack>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="rounded-full"
-          accessibilityLabel="Open the park map"
-          onPress={() => router.push("/map")}
+    <Page
+      title={fromMap ? "Park rides" : "Explore"}
+      refreshing={refreshing && !!rides}
+      onRefresh={reload}
+    >
+      {!fromMap && (
+        <HStack
+          space="md"
+          className="bg-hero rounded-2xl px-4 py-3 items-center"
         >
-          <ButtonIcon as={GlobeIcon} />
-          <ButtonText>Map</ButtonText>
-        </Button>
-      </HStack>
+          <VStack space="xs" className="flex-1">
+            <Text bold className="text-hero-foreground">
+              Your park today
+            </Text>
+            <Text size="sm" className="text-hero-muted">
+              {rides
+                ? `${rides.length} rides · ${rides.filter((r) => !r.under_maintenance).length} operational`
+                : "Explore attractions"}
+            </Text>
+          </VStack>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="rounded-full"
+            accessibilityLabel="Open the park map"
+            onPress={() => router.push("/map")}
+          >
+            <ButtonIcon as={GlobeIcon} />
+            <ButtonText>Map</ButtonText>
+          </Button>
+        </HStack>
+      )}
       <VStack space="md">
         <Input className="rounded-xl bg-card shadow-none">
           <InputSlot>
@@ -139,7 +148,9 @@ export default function Discover() {
               accessibilityLabel={`Explore ${ride.ride_name}`}
               onPress={() =>
                 router.push({
-                  pathname: "/(visitor)/(explore)/ride/[id]",
+                  pathname: fromMap
+                    ? "/(visitor)/(map)/ride/[id]"
+                    : "/(visitor)/(explore)/ride/[id]",
                   params: { id: ride.ride_id },
                 })
               }
