@@ -19,9 +19,12 @@ from rideApp.admin import ride_employee_admin_site
 from restaurantApp.admin import restaurant_employee_admin_site
 from django.conf import settings
 from django.conf.urls.static import static
+from adminApp.operations import OperationsIndex, router as operations_router
 
 
 urlpatterns = [
+    path("api/operations/", OperationsIndex.as_view(), name="operations-index"),
+    path("api/operations/", include(operations_router.urls)),
     path("admin/", admin.site.urls),
     path("api/restaurantEmployee/", restaurant_employee_admin_site.urls),
     path("api/rideEmployee/", ride_employee_admin_site.urls),

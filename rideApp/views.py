@@ -29,7 +29,7 @@ class ThemeParkViewSet(SafeDestroyMixin, viewsets.ModelViewSet):
 
 class ThemeParkAreaViewSet(SafeDestroyMixin, viewsets.ModelViewSet):
     permission_classes = [PublicReadStaffWrite]
-    queryset = ThemeParkArea.objects.all()
+    queryset = ThemeParkArea.objects.select_related("park_id")
     serializer_class = ThemeParkAreaSerializer
 
 

@@ -1,5 +1,6 @@
 from django.contrib.admin.utils import NestedObjects
 from django.db import router, transaction
+from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 
@@ -27,7 +28,7 @@ def deletion_summary(instance, user):
 class SafeDestroyMixin:
     @transaction.atomic
     def perform_destroy(self, instance):
-        instance = type(instance).objects.select_for_update().get(pk=instance.pk)
+        instance = get_object_or_404(type(instance).objects.select_for_update(), pk=instance.pk)
         counts = deletion_summary(instance, self.request.user)
         if sum(item["count"] for item in counts) > 1 and self.request.query_params.get("confirm") != "true":
             raise ValidationError({

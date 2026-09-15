@@ -11,5 +11,5 @@ class StoreViewSet(SafeDestroyMixin, viewsets.ModelViewSet):
 
 class ProductViewSet(SafeDestroyMixin, viewsets.ModelViewSet):
     permission_classes = [PublicReadStaffWrite]
-    queryset = Product.objects.all()
+    queryset = Product.objects.select_related("store")
     serializer_class = ProductSerializer

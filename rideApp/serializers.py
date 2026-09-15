@@ -10,6 +10,8 @@ class ThemeParkSerializer(serializers.ModelSerializer):
 
 
 class ThemeParkAreaSerializer(ModelCleanSerializer):
+    park_name = serializers.CharField(source="park_id.park_name", read_only=True)
+
     class Meta:
         model = ThemeParkArea
         fields = "__all__"
