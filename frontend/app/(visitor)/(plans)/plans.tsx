@@ -55,6 +55,7 @@ function PlanList() {
       ) : (
         <FlatList
           data={data || []}
+          windowSize={7}
           keyExtractor={(item) => String(item.reservation_id)}
           style={{ flex: 1 }}
           contentContainerStyle={{ paddingBottom: 24 }}
@@ -73,40 +74,46 @@ function PlanList() {
               </Card>
             ) : null
           }
-          renderItem={({ item }) => (
-            <Card size="sm" className="mb-3 w-full max-w-xl">
-              <HStack space="md" className="items-center justify-between">
-                <VStack space="xs" className="flex-1">
-                  <Heading size="lg">{item.ride_name}</Heading>
-                  <Text size="sm" className="text-muted-foreground">
-                    {item.visitor_name} · {displayDate(item.date)}
-                  </Text>
-                  <Text bold size="sm">
-                    {item.start_time.slice(0, 5)}–{item.end_time.slice(0, 5)}{" "}
-                    {item.time_zone}
-                  </Text>
-                </VStack>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  accessibilityLabel={`Open ${item.visitor_name}'s ${item.ride_name} reservation`}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/reservation/[id]",
-                      params: { id: item.reservation_id },
-                    })
-                  }
+          renderItem={({ item }) => {
+            const dateLabel = displayDate(item.date);
+            return (
+              <Card size="sm" className="mb-3 w-full max-w-xl">
+                <HStack
+                  space="md"
+                  className="flex-wrap items-center justify-between"
                 >
-                  <ButtonText>Open pass</ButtonText>
-                </Button>
-              </HStack>
-              {item.validated && (
-                <Badge variant="secondary" className="self-start">
-                  <BadgeText>Admitted</BadgeText>
-                </Badge>
-              )}
-            </Card>
-          )}
+                  <VStack space="xs" className="flex-1 min-w-48">
+                    <Heading size="lg">{item.ride_name}</Heading>
+                    <Text size="sm" className="text-muted-foreground">
+                      {item.visitor_name} · {dateLabel}
+                    </Text>
+                    <Text bold size="sm">
+                      {item.start_time.slice(0, 5)}–{item.end_time.slice(0, 5)}{" "}
+                      {item.time_zone}
+                    </Text>
+                  </VStack>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    accessibilityLabel={`Open ${item.visitor_name}'s ${item.ride_name} reservation, ${dateLabel}, ${item.start_time.slice(0, 5)} ${item.time_zone}`}
+                    onPress={() =>
+                      router.push({
+                        pathname: "/reservation/[id]",
+                        params: { id: item.reservation_id },
+                      })
+                    }
+                  >
+                    <ButtonText>Open pass</ButtonText>
+                  </Button>
+                </HStack>
+                {item.validated && (
+                  <Badge variant="secondary" className="self-start">
+                    <BadgeText>Admitted</BadgeText>
+                  </Badge>
+                )}
+              </Card>
+            );
+          }}
         />
       )}
     </Page>

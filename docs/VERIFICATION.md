@@ -704,3 +704,39 @@ including the native build with deployment-mode pod installation. The downloaded
 pod lock exactly matches the committed lock. Physical-device behavior, API
 connectivity, signing, App Store distribution and release performance are still
 open.
+
+## Long Plans list and compact cards — 16 September 2026
+
+The installed Pixel 10 debug app was checked with 120 future reservations across
+30 visits for a temporary local visitor, 17 September–16 October 2026. Normal
+model validation created the fixture; existing catalog records were unchanged.
+The same app and dataset were used before and after reducing the FlatList window
+to 7. React work decreased; native frame timings were mixed. The complete
+comparison and its limits are in [performance](PERFORMANCE.md#long-plans-list--16-september-2026).
+
+At 320 × 560 dp and font scale 1.6, the long name/date were squeezed beside the
+pass action. Allowing the action to wrap below the details made the full card
+readable and exposed more of the next card. Bottom tabs remained visible with
+their full labels and rounded selection. At the restored 1080 × 2424 px size,
+density 420 and font scale 1.0, the action stayed beside the details.
+
+![Normal Pixel Plans layout](verification/android-plans-normal.png)
+![Compact Plans before and after](verification/android-plans-large-text.png)
+
+Fast scrolling reached the last reservation at both dimensions. On the final
+code, its action opened Java Jamboree for 16 October, 10:30–10:35 UTC; Back to
+plans retained the bottom scroll position. The final native accessibility tree
+also exposed distinct date/time labels for repeated visitor/ride combinations.
+Sampled scroll-video inspection is documented in the performance review; it is
+not a release-FPS or exhaustive blank-frame test.
+
+Type checking, lint, all nine frontend tests and Android/iOS/web JavaScript
+exports passed. Sign-out revoked the QA token. Only the temporary visitor,
+30 admission tickets and 120 reservations were removed; its credential fixture
+was deleted. The original six tickets remain, native demo sign-in was restored,
+and the park hierarchy audit again reported zero mismatches. The historical
+database was untouched.
+
+The desktop browser inventory still returned no providers, and Safari attachment
+returned `cgWindowNotFound`. Complete browser workflows, TalkBack/VoiceOver,
+iOS runtime and release performance remain open.

@@ -193,3 +193,59 @@ This verifies ELF layout for the debug APK used in the Pixel walkthrough.
 Repeat both ELF and zip checks on the actual signed release APKs generated from
 the release AAB, including any additional 64-bit ABI. It does not establish
 release behavior, performance or store acceptance.
+
+## Long Plans list — 16 September 2026
+
+The installed Pixel debug app was measured with 120 future reservations across
+30 visits, 17 September–16 October 2026, for one temporary visitor with a long
+first name. Each day had four valid, non-overlapping bookings on the two
+operational demo rides. The catalog was unchanged. Normal device dimensions were
+1080 × 2424 px, density 420, font scale 1.0; Metro served a development bundle.
+
+The existing FlatList's default window mounted more offscreen rows than this
+phone flow needed. Changing only `windowSize` to 7 reduced measured React work.
+The final implementation also lets the pass action wrap below the details on
+narrow screens and includes date/time in its accessible name. Stable reservation
+keys and variable row heights remain; no list library, memoization or fixed
+`getItemLayout` was added.
+
+Each sample began after a fresh app launch and navigation to You. With React
+DevTools attached, reset Android graphics counters, start profiling, open Plans,
+scroll down 0.4 viewport heights, scroll up 0.4, then stop and export. The 5.8–6.3
+second recording windows include tool settling and are not startup or FPS
+measurements. Each column is a single sample, not an averaged benchmark.
+
+| Measurement | Default window 21 | Window 7 only | Window 7 + wrapping | Final, including labels |
+| --- | ---: | ---: | ---: | ---: |
+| React commits | 26 | 23 | 21 | 24 |
+| Total exclusive React work | 231.587 ms | 143.002 ms | 149.639 ms | 162.399 ms |
+| Maximum inclusive commit | 84.247 ms | 72.907 ms | 77.453 ms | 86.103 ms |
+| Android rendered frames | 113 | 83 | 81 | 86 |
+| Frame deadline misses | 12 (10.62%) | 7 (8.43%) | 9 (11.11%) | 8 (9.30%) |
+| Frame time, 95th percentile | 23 ms | 22 ms | 25 ms | 22 ms |
+| Frame time, 99th percentile | 32 ms | 23 ms | 36 ms | 65 ms |
+
+The final sample used about 30% less total exclusive React work. Native frame
+results are mixed, including a worse final 99th percentile; this does not prove
+smoother release rendering. Keep the narrower window for the measured reduction
+in React work, and repeat on release builds and physical devices before claiming
+a frame-rate improvement.
+
+To check the smaller window's blank-content risk, fast scrolling reached the
+120th reservation at both normal dimensions and 320 × 560 dp with font scale 1.6.
+Opening the last pass and returning retained the list position. A 20-second
+compact-device recording covers the first part of the scroll, not the entire
+list. Its 199 frames sampled at 10 Hz showed populated cards; the six samples
+with the least dark content in the list region were also visually inspected.
+This cannot exclude blanks shorter than 100 ms or establish FPS.
+
+![Lowest-content sampled scroll frames](verification/android-plans-scroll-samples.png)
+
+Ignored raw evidence is under `.local/verification/`: profiles
+`long-plans-baseline`, `long-plans-window7`, `long-plans-final` (wrapping) and
+`long-plans-labelled` (final code), each with JSON and graphics-counter exports;
+`virtualq-long-plans-scroll.mp4` and `long-plans-scroll-frames/`.
+The exploratory `long-plans.json` used different gestures and is not part of
+the comparison. The temporary account and bookings were removed after sign-out,
+the original six tickets remain, and the demo session/device settings were
+restored.
