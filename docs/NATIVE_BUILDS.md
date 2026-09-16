@@ -72,6 +72,12 @@ arm64 debug build on Linux with JDK 17. It uploads
 gh run download RUN_ID --name virtualq-android-arm64-debug --dir .local/android-artifact
 ```
 
+The installed CI debug artifact also passed an ELF-level check of all 25 arm64
+native libraries: every LOAD segment has 16 KB alignment. Its hash was matched
+against the installed APK. See [the binary audit](PERFORMANCE.md#installed-android-elf-alignment--16-september-2026).
+Repeat ELF and zip checks on release artifacts; the debug result is not a
+release certification.
+
 ## iOS simulator build
 
 The `ios` CI job uses the arm64 `macos-26` runner, Xcode 26.4.1, Node 22 and
