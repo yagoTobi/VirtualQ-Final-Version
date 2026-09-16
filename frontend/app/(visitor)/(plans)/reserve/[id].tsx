@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Platform } from "react-native";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useSegments } from "expo-router";
 import { Page } from "@/components/page";
 import { RequireAuth } from "@/components/require-auth";
 import { DateField } from "@/components/date-field";
@@ -26,14 +26,25 @@ import { useResource } from "@/lib/use-resource";
 import { displayDate, visitDate } from "@/lib/dates";
 
 export default function Reserve({ fromMap = false }: { fromMap?: boolean }) {
+  const { id, date } = useLocalSearchParams<{ id: string; date?: string }>();
   return (
     <RequireAuth>
-      <ReservationForm fromMap={fromMap} />
+      <ReservationForm key={`${id}:${date || ""}`} fromMap={fromMap} />
     </RequireAuth>
   );
 }
 
 function ReservationForm({ fromMap }: { fromMap: boolean }) {
+  const segments: readonly string[] = useSegments();
+  const currentTab = segments[1];
+  function leave(href: Parameters<typeof router.navigate>[0], targetTab: string) {
+    if (currentTab === targetTab) {
+      router.dismissTo(href);
+    } else {
+      // POP_TO is a stack action; switch tabs with NAVIGATE.
+      router.navigate(href);
+    }
+  }
   const params = useLocalSearchParams<{ id: string; date?: string }>();
   const { token } = useAuth();
   const [date, setDate] = useState(visitDate(params.date));
@@ -42,6 +53,7 @@ function ReservationForm({ fromMap }: { fromMap: boolean }) {
   const [period, setPeriod] = useState("all");
   const [review, setReview] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [booked, setBooked] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const ride = useResource<Ride>(
     `/api/parkRides/theme_park_rides/${encodeURIComponent(params.id)}/`,
@@ -73,7 +85,7 @@ function ReservationForm({ fromMap }: { fromMap: boolean }) {
     ) || [];
   const ready = !!slot && fits(slot) && !ride.data?.under_maintenance;
   async function book() {
-    if (busy || !ready) return;
+    if (busy || booked || !ready) return;
     setBusy(true);
     setError(null);
     try {
@@ -88,7 +100,8 @@ function ReservationForm({ fromMap }: { fromMap: boolean }) {
           })),
         ),
       });
-      router.dismissTo("/plans");
+      setBooked(true);
+      leave("/plans", "(plans)");
     } catch (err) {
       setError(err);
       setReview(false);
@@ -96,6 +109,30 @@ function ReservationForm({ fromMap }: { fromMap: boolean }) {
     } finally {
       setBusy(false);
     }
+  }
+  if (booked) {
+    return (
+      <Page title="Ride reserved">
+        <Card size="sm" className="w-full max-w-xl self-center">
+          <Heading size="xl">Your places are reserved.</Heading>
+          <Text>
+            {ride.data?.ride_name} · {displayDate(date)} · {time.slice(0, 5)} UTC
+          </Text>
+          <Alert accessibilityRole="alert">
+            <AlertText>Each visitor’s ride pass is ready in Plans.</AlertText>
+          </Alert>
+          <Button onPress={() => router.navigate("/plans")}>
+            <ButtonText>Open ride passes</ButtonText>
+          </Button>
+          <Button
+            variant="outline"
+            onPress={() => router.dismissTo(fromMap ? "/map" : "/")}
+          >
+            <ButtonText>{fromMap ? "Back to map" : "Back to Explore"}</ButtonText>
+          </Button>
+        </Card>
+      </Page>
+    );
   }
   return (
     <Page
@@ -283,12 +320,15 @@ function ReservationForm({ fromMap }: { fromMap: boolean }) {
         <Button
           variant="link"
           onPress={() =>
-            router.dismissTo({
-              pathname: fromMap
-                ? "/(visitor)/(map)/ride/[id]"
-                : "/(visitor)/(explore)/ride/[id]",
-              params: { id: params.id },
-            })
+            leave(
+              {
+                pathname: fromMap
+                  ? "/(visitor)/(map)/ride/[id]"
+                  : "/(visitor)/(explore)/ride/[id]",
+                params: { id: params.id },
+              },
+              fromMap ? "(map)" : "(explore)",
+            )
           }
         >
           <ButtonText>Back to ride details</ButtonText>

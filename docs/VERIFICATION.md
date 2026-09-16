@@ -507,6 +507,61 @@ screen-reader checks remain open. Safari's computer-use connection currently
 returns `cgWindowNotFound`; Chrome on the emulator awaits user confirmation of
 its first-run terms. No browser result is inferred from the static export.
 
+## Installed visitor workflow — 16 September 2026
+
+The installed Pixel 10 debug app completed sign-in, profile editing, visit booking
+for 17 September with one guest, guest name/age/height editing, park-pass QR
+display, map/ride browsing, the native date picker, group/time selection, ride
+confirmation, ride-pass QR display and cancellation. Registration for this
+disposable account used HTTP; registration UI submission was not repeated.
+
+Guest edits survived an app restart. The walkthrough exposed missing save
+feedback: the form now confirms a successful save, clears that message on edits
+and disables its fields while saving. The screenshot below is cropped to exclude
+the test pass's QR code.
+
+![Guest save feedback](verification/android-guest-saved.png)
+
+Confirming from the map originally created both reservations but left the booking
+form open: `dismissTo` sent a stack-only POP_TO action to the JavaScript tabs.
+Completion now dismisses within the Plans stack or navigates across tabs.
+Returning to the originating tab shows a saved confirmation with no repeat
+submission action; Back to map retained pin 2. Explicit ride/date route changes
+reset the form's local state. The final repeat used the map reservation deep link
+for 17 September after selecting pin 2; the earlier reproduction reached that
+same form through map pin → ride details → Reserve a ride.
+
+![Confirmed booking](verification/android-reservation-confirmed.png)
+
+The next-pass banner opened the holder's 09:30 ride pass. Keep reservation
+dismissed its confirmation without changing the reservation. Confirm cancellation
+then returned to Plans and removed only the holder's seat; the guest's 09:30
+reservation remained. Stored records confirmed the profile and guest updates,
+eight reservations across the verification attempts and seven after cancellation.
+
+![Plans after cancellation](verification/android-reservation-cancelled.png)
+
+An intermediate attempt to pop the source stack and change tabs together caused
+an Android `addViewAt`/SVG-parent rendering error. That sequence was removed.
+The final sequence uses one navigation action and an explicit saved state; no
+`addViewAt` failure appeared in its app process. This is a targeted reproduction
+and repeat, not an exhaustive native crash test. The separate initial-link
+development warning remains open. Active tab backgrounds also need a further
+visual check: later captures show square corners where earlier captures show
+rounded backgrounds.
+
+Nine frontend tests, type checking, lint and all three JavaScript exports pass.
+The unchanged backend has 65 passing tests from the recovery checkpoint.
+The test visitor signed out, the demo session was restored, and all temporary
+visitor/ticket/guest/reservation records and credential fixtures were removed.
+The original six tickets remain; the hierarchy audit reports no mismatches.
+No historical database, dependency or native build configuration changed.
+
+The map-origin completion and cancellation above were verified in the installed
+Android app. Explore/Plans-origin completion, web back links, explicit-date
+deep-link replacement and screen-reader announcements still need runtime checks.
+This pass does not establish large-font coverage, release FPS or iOS runtime.
+
 ## Checks still required
 
 Reset confirmation is migrated with the remaining checks listed above. Staff CRUD is implemented
