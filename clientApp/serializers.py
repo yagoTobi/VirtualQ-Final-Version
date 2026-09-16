@@ -5,6 +5,15 @@ from rest_framework import serializers
 
 CustomUser = get_user_model()
 
+class ResetLinkSerializer(serializers.Serializer):
+    uid = serializers.CharField(max_length=128)
+    token = serializers.CharField(max_length=128, write_only=True)
+
+
+class PasswordResetSerializer(ResetLinkSerializer):
+    new_password1 = serializers.CharField(trim_whitespace=False, write_only=True)
+    new_password2 = serializers.CharField(trim_whitespace=False, write_only=True)
+
 
 class UserUpdateSerializer(serializers.ModelSerializer):
     height = serializers.IntegerField(min_value=1, max_value=300, allow_null=True, required=False)

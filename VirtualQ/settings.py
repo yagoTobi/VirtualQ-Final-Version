@@ -1,7 +1,9 @@
 """Local development settings. The historical database and .env are not loaded."""
 import os
 from pathlib import Path
+from urllib.parse import urlsplit
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,6 +47,14 @@ MIDDLEWARE = [
 CORS_ALLOWED_ORIGINS = os.environ.get(
     "CORS_ALLOWED_ORIGINS", "http://localhost:8081,http://127.0.0.1:8081,http://localhost:19006,http://127.0.0.1:19006"
 ).split(",")
+VIRTUALQ_WEB_ORIGIN = os.environ.get("VIRTUALQ_WEB_ORIGIN", "http://localhost:8081").rstrip("/")
+web_origin = urlsplit(VIRTUALQ_WEB_ORIGIN)
+if (
+    web_origin.scheme not in ("http", "https") or not web_origin.hostname
+    or web_origin.username or web_origin.password or web_origin.path
+    or web_origin.query or web_origin.fragment
+):
+    raise ImproperlyConfigured("VIRTUALQ_WEB_ORIGIN must be an HTTP(S) origin without a path or credentials.")
 
 ROOT_URLCONF = "VirtualQ.urls"
 WSGI_APPLICATION = "VirtualQ.wsgi.application"
