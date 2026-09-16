@@ -125,7 +125,7 @@ jobs:
       - name: Check and package simulator app
         run: |
           test -f build/ios/Build/Products/Release-iphonesimulator/VirtualQ.app/main.jsbundle
-          lipo -verify_arch arm64 build/ios/Build/Products/Release-iphonesimulator/VirtualQ.app/VirtualQ
+          lipo build/ios/Build/Products/Release-iphonesimulator/VirtualQ.app/VirtualQ -verify_arch arm64
           tar -C build/ios/Build/Products/Release-iphonesimulator \
             -czf build/VirtualQ.app.tar.gz VirtualQ.app
       - uses: actions/upload-artifact@v7.0.1
