@@ -198,6 +198,9 @@ jobs:
             sleep 1
           done
           sleep 3
+          xcrun simctl io "$vq_simulator" screenshot "$VIRTUALQ_IOS_EVIDENCE/explore-initial.png"
+          # Allow transient simulator welcome notifications to disappear.
+          sleep 8
           xcrun simctl io "$vq_simulator" screenshot "$VIRTUALQ_IOS_EVIDENCE/explore.png"
           if [ "$vq_received" != true ]; then
             echo "::error::The iOS app did not fetch the ride catalog successfully."

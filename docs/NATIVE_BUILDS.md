@@ -53,8 +53,8 @@ adb shell am start -n com.virtualq.app/.MainActivity
 
 `npm run android` is Expo's standard build/install command and can start Metro
 itself. `npm run android:go` and `make preview-android` retain the Expo Go path.
-`npm run ios` is the corresponding native iOS command; iOS runtime verification
-is still outstanding.
+`npm run ios` is the corresponding native iOS command. CI now verifies iOS
+startup and catalog connectivity; broader iOS workflows remain outstanding.
 
 The arm64 debug APK is a development app, needs Metro, and uses the generated
 debug signing key. It is separate from Expo Go and has its own stored session.
@@ -142,15 +142,23 @@ with a newly migrated, seeded database under the runner's temporary directory.
 No historical database or developer account is used.
 
 The check installs and launches the Release app, waits for its successful ride
-catalog request, and captures the first screen. Its readiness probe requests
+catalog request, and captures the first screen twice, eight seconds apart, so
+transient simulator notifications can disappear. Its readiness probe requests
 parks, so that probe cannot satisfy the app's ride-request assertion. The backend
 and simulator stop afterward. The `virtualq-ios-startup-evidence` artifact
-contains the screenshot, simulator inventory, launch result and backend request
+contains both screenshots, simulator inventory, launch result and backend request
 log; inspect the screenshot before claiming the layout was verified.
 
 The automated assertion covers startup and public catalog connectivity, not iOS
 authentication, booking, camera, accessibility, release FPS or physical-device
 behavior. A passing job still requires visual inspection of its screenshot.
+
+The first runtime check passed in PR #23 commit `a451c90`, Actions run
+`35057206466`. The app fetched all three seeded rides successfully. Visual
+inspection showed the native list and five bottom tabs, but an iOS welcome
+notification obscured the header. It also exposed a low-contrast placeholder;
+the shared primitive fix and Android regression evidence are recorded in the
+[accessibility review](ACCESSIBILITY.md#native-placeholder-color--16-september-2026).
 
 ### First verified artifact — 16 September 2026
 
