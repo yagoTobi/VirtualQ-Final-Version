@@ -612,3 +612,39 @@ Browser inventory remains empty and Safari control returns `cgWindowNotFound`.
 This checkpoint does not verify browser sign-in/booking, legacy POST-to-modern
 handoff, staff row edits/deletion/admission or desktop accessibility. Removal of
 compatibility forms remains conditional on those checks.
+
+## Compact phone and large-text checks — 16 September 2026
+
+The installed Pixel app was checked at 840 × 1470 px, density 420
+(320 × 560 dp), with font scale 1.6. Profile fields remained scrollable, and
+the save/cancel controls were reachable. The visit form exposed both Save visit
+and Back to tickets; Back returned to the ticket list without submitting a
+booking. No profile values or visitor records were changed.
+
+The check reproduced truncated Explore, Plans and Tickets tab labels. Native
+labels now use `adjustsFontSizeToFit` with `minimumFontScale={0.8}` alongside the
+existing one-line/max-multiplier settings. Explore and Tickets selection both
+retain full labels and rounded highlights at the tested size. Content text still
+uses the system's scaling; accessibility labels and touch targets are unchanged.
+
+![Tab labels at 160% text size](verification/android-large-text-tabs.png)
+![Reachable visit actions on the compact phone](verification/android-large-text-booking.png)
+
+Type checking, lint, all nine frontend tests and Android/iOS/web JavaScript
+exports passed. The original 1080 × 2424 px size, density 420,
+font scale 1.0, input method and hardware-keyboard preference were restored.
+Gboard opened a floating stylus/number pad during the profile check, so this does
+not establish docked-keyboard behavior at the compact size. TalkBack, iOS runtime
+and a complete large-text screen sweep remain open.
+
+## Shared form contrast — 16 September 2026
+
+Input and Select boundaries now use a dedicated, stronger input token.
+The Profile screen was visually checked in the installed Android app after a
+fresh Metro bundle. Empty and populated fields retained their layout, and
+their outlines were clearer against the white card. No values were saved.
+
+Calculated light and dark boundary, placeholder and focus ratios, before/after
+screenshots and the remaining coverage are in [the accessibility review](ACCESSIBILITY.md).
+The app currently forces light mode; dark token calculations are not dark-mode
+runtime verification.
