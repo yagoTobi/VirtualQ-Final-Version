@@ -381,6 +381,39 @@ exports passed. No dependencies were added. This does not establish native
 binary compatibility, release FPS, iOS runtime, a full six-pin visual check,
 long ride lists or a full accessibility audit.
 
+## Installed Android app — 15 September 2026
+
+An arm64 debug APK built from the generated Expo Android project and installed
+as `com.virtualq.app` on the Pixel 10. The build uses Node 22, Temurin
+17.0.20.1+1, Gradle 9.3.1 and NDK 27.1.12297006. Android Studio's bundled Java 25
+failed CMake configuration; Java 17 passed. Reproduction and CI artifact
+instructions are in [Native builds](NATIVE_BUILDS.md).
+
+The installed app loaded the three seeded rides, retained Map pin 2 through
+ride details and Back, and signed in with the synthetic demo staff account.
+Installing the final APK over that app and force-stopping/restarting it retained
+the secure session. The native date dialog opened and cancelled successfully.
+Camera permission was granted for this session only; the emulator's virtual
+scene rendered in the preview and Close camera stopped it.
+
+![Installed app](verification/android-apk-explore.png)
+![Restored native session](verification/android-apk-account.png)
+![Native camera preview](verification/android-apk-camera.png)
+
+The final APK is 93,194,006 bytes, SHA-256
+`58357a98e94811a7f5ca3607e956446807db516ad76f68f9765d66f63cc69ddc`.
+Its merged manifest has camera access and no microphone or legacy external
+storage permissions. The emulator reports a 16,384-byte page size; APK zip
+alignment passed `zipalign -c -P 16 4`. The crash buffer was empty after these
+checks. This is not an exhaustive crash test or an ELF/release alignment audit.
+
+Type checking, lint, six frontend tests and Expo dependency alignment pass.
+The high-severity npm audit gate passes with three moderate findings still
+reported. Native library deprecation warnings remain in the Gradle log.
+This debug APK requires Metro and is not a signed production release. This pass
+did not repeat QR decoding or all booking mutations in the installed binary;
+earlier Expo Go evidence remains separate.
+
 ## Checks still required
 
 Reset confirmation needs migration and runtime checks. Staff CRUD is implemented

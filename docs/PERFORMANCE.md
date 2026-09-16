@@ -134,3 +134,13 @@ not startup-time, memory, FPS or native installation measurements.
 The Pixel regression kept the 16 September party selection across Map/Tickets
 and the visitor chrome remained in place. This check does not replace the
 navigation measurements above or establish release performance.
+
+## Android binary baseline — 15 September 2026
+
+The first verified arm64 debug APK is 93,194,006 bytes. It runs as
+`com.virtualq.app` on the Pixel 10, whose reported page size is 16,384 bytes.
+APK zip alignment passes the SDK's 16 KB check. This is the APK file size,
+not installed disk use, memory consumption or release download size.
+Debug signing, Metro-delivered JavaScript and development tooling make it
+unsuitable for release FPS or cold-start comparisons. Release profiling and
+ELF alignment review remain open.

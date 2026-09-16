@@ -134,6 +134,10 @@ For a LAN device,
 set `EXPO_PUBLIC_API_URL` and configure Django's hosts/bind address as described
 below. `CI=1` disables Metro watching on this Mac; restart after source edits.
 
+For an installed Android app, see [native build setup](docs/NATIVE_BUILDS.md).
+This uses JDK 17 and the generated Expo Android project. The debug APK requires
+Metro; it is a separate app from Expo Go.
+
 ### Staff workspace
 
 Park → areas → attractions, venues and employees, with products under stores:
