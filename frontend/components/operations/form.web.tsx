@@ -9,6 +9,7 @@ import {
   RecordPage,
   Schema,
   fieldLabel,
+  fieldValue,
   operationsPath,
   recordLabel,
 } from "@/lib/operations";
@@ -53,6 +54,25 @@ import {
 const inputClass =
   "min-h-12 w-full rounded-md border border-input bg-card px-3 text-base text-foreground focus:outline-primary disabled:opacity-60";
 
+function RelatedRecordLabel({
+  resource,
+  value,
+}: {
+  resource: string;
+  value: string;
+}) {
+  const { token } = useAuth();
+  const record = useResource<RecordData>(
+    `${operationsPath(resource)}${encodeURIComponent(value)}/`,
+    token,
+  );
+  return record.data
+    ? recordLabel(record.data)
+    : record.error
+      ? `Record #${value} unavailable`
+      : "Loading selection…";
+}
+
 export function RelatedPicker({
   field,
   value,
@@ -86,7 +106,9 @@ export function RelatedPicker({
             : selection?.value === value
             ? selection.label
             : value
-              ? `Selected record #${value} · Change`
+              ? (
+                <RelatedRecordLabel resource={field.resource!} value={value} />
+              )
               : `Choose ${field.label.toLowerCase()}`}
         </ButtonText>
       </Button>
@@ -348,7 +370,27 @@ export function RecordEditor({
                         {immutable || readOnly ? (
                           <VStack space="sm">
                             <Text bold>{fieldLabel(name, field)}</Text>
-                            <Text>{String(record?.[name] ?? "—")}</Text>
+                            {field.type === "image upload" && record?.[name] ? (
+                              <a
+                                href={String(record[name])}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-primary underline"
+                              >
+                                View image
+                              </a>
+                            ) : (
+                              <Text>
+                                {field.resource && record?.[name] != null ? (
+                                  <RelatedRecordLabel
+                                    resource={field.resource}
+                                    value={String(record[name])}
+                                  />
+                                ) : (
+                                  fieldValue(record?.[name], field)
+                                )}
+                              </Text>
+                            )}
                           </VStack>
                         ) : field.resource ? (
                           <RelatedPicker
@@ -441,7 +483,7 @@ export function RecordEditor({
                               <input
                                 aria-labelledby={`edit-${name}`}
                                 type={field.type}
-                                value={String(value)}
+                                defaultValue={String(value)}
                                 className={inputClass}
                                 required={field.required}
                                 onChange={(event) =>

@@ -81,7 +81,11 @@ class OperationsViewSet(PrivateResponseMixin, SafeDestroyMixin, viewsets.ModelVi
             fields[name]["multiline"] = field.style.get("base_template") == "textarea.html"
             fields[name]["allow_null"] = field.allow_null
             fields[name]["allow_blank"] = getattr(field, "allow_blank", False)
-            fields[name]["immutable"] = self.queryset.model is Ticket and name in ("user", "guest_number")
+            fields[name]["immutable"] = (
+                self.queryset.model is Ticket and name in ("user", "guest_number")
+            ) or (
+                self.queryset.model is Guest and name == "ticket"
+            )
             if isinstance(field, serializers.PrimaryKeyRelatedField) and field.queryset is not None:
                 fields[name]["resource"] = next(
                     (key for key, view in RESOURCES if view.queryset.model is field.queryset.model), None

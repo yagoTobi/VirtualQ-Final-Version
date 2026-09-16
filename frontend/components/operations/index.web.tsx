@@ -10,6 +10,7 @@ import {
   RecordData,
   RecordPage,
   fieldLabel,
+  fieldValue,
   recordLabel,
   operationsPath,
 } from "@/lib/operations";
@@ -567,7 +568,10 @@ function ResourceListing({ resource }: { resource: Resource }) {
                               </span>
                             ) : (
                               <span className={i === 0 ? "font-semibold" : ""}>
-                                {String(record[name] ?? "—")}
+                                {fieldValue(
+                                  record[name],
+                                  schema.data!.fields[name],
+                                )}
                               </span>
                             )}
                           </TableData>
