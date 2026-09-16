@@ -87,3 +87,11 @@ Unused template background/splash artwork is removed. The app blocks legacy
 external-storage permissions; the camera permission remains for ticket scanning.
 Secure Store's config plugin excludes its encrypted entries from Android backup.
 Inspect the merged APK manifest when changing native dependencies.
+
+## Open diagnostic
+
+Expo Router 57.0.21 logged one development warning about a state update before
+mounting after replacing the local app with the CI APK. The stack points to its
+initial-link promise handler. A subsequent cold start did not repeat it and
+navigation/session restoration worked. Recheck initial links and release
+startup before shipping; do not hide the warning or assume it is resolved.

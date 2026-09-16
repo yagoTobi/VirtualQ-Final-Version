@@ -135,7 +135,7 @@ The Pixel regression kept the 16 September party selection across Map/Tickets
 and the visitor chrome remained in place. This check does not replace the
 navigation measurements above or establish release performance.
 
-## Android binary baseline — 15 September 2026
+## Android binary baseline — 16 September 2026
 
 The first verified arm64 debug APK is 93,194,006 bytes. It runs as
 `com.virtualq.app` on the Pixel 10, whose reported page size is 16,384 bytes.
