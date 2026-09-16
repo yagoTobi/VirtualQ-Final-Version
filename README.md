@@ -108,8 +108,8 @@ registration/sign-in/password recovery, profile editing, visit booking, ticket Q
 passes, guest details, group ride reservations, cancellation and ticket scanning.
 Native tabs retain their screens, dates and passes, and secure sessions survive
 restarts. The staff workspace now covers the management resources with
-permission-aware APIs and forms. Its full browser walkthrough and the existing
-Django booking/authentication pages remain in progress. See
+permission-aware APIs and forms. Its full browser walkthrough and removal of
+the retained Django form submissions remain in progress. See
 [the plan](docs/MODERNIZATION.md) and [native evidence](docs/VERIFICATION.md).
 
 With Python 3.12 and Node 22 installed:
@@ -138,12 +138,20 @@ For an installed Android app, see [native build setup](docs/NATIVE_BUILDS.md).
 This uses JDK 17 and the generated Expo Android project. The debug APK requires
 Metro; it is a separate app from Expo Go.
 
-### Password recovery
+### Visitor web links and password recovery
 
 Set `VIRTUALQ_WEB_ORIGIN` in `.env.local` to the visitor frontend's origin
 (default `http://localhost:8081`). Include that origin in
 `CORS_ALLOWED_ORIGINS`. For another device, use an address it can reach; a
 production deployment needs its public HTTPS origin and working email delivery.
+
+Old `/api/tickets/book_visit/` and `/api/tickets/login/` bookmarks now redirect
+to the shared `/book-visit` screen. The app uses its existing API session or asks
+the visitor to sign in before returning to booking. A Django website session is
+not transferred into the app's API session; it may require signing in again.
+Already-open Django forms still accept authenticated POST submissions with their
+existing validation and QR responses. Their templates remain until the browser
+parity checks pass. Both the backend and modern frontend must be running.
 
 Reset emails open `/set-password` in the shared visitor app. The credential is
 carried in the URL fragment, checked through a POST request, and removed from the

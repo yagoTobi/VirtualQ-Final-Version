@@ -572,6 +572,7 @@ long-history checks remain.
 Avatar selection is intentionally consolidated into initials until usable assets
 exist, as recorded in the migration plan. No physical device, iOS simulator,
 native release binary or app-store installation has been verified.
+
 ## Selected native tab shape — 16 September 2026
 
 The installed Pixel 10 app initially rendered Explore's selected background as
@@ -587,3 +588,27 @@ lint and all nine frontend tests passed. This is installed Android debug
 verification; iOS runtime and release performance were not measured.
 
 ![Native tab highlights before and after the fix](verification/android-tab-shape.png)
+
+## Visitor web entry compatibility — 16 September 2026
+
+GET and HEAD requests to the former Django booking and ticket-login pages now
+redirect to `/book-visit` at the configured `VIRTUALQ_WEB_ORIGIN`. Neither supplied
+`next` nor other query parameters select the redirect destination. The shared
+app retains its API session or asks for sign-in before booking. A Django session
+does not become an API credential.
+
+Already-open login and booking forms retain their POST validation, session
+authentication, party-reduction confirmation and QR responses. Their templates
+remain pending browser parity; the compatibility QR page now links to the
+configured frontend instead of a fixed development-machine IP.
+
+All **67 backend tests** passed on disposable file-backed SQLite, along with
+system and migration-drift checks. Live GET/HEAD checks returned 302 and
+`no-store`; the redirected frontend route returned HTTP 200 HTML. The local
+hierarchy audit again reported zero mismatches. No catalog or visitor records
+were created or changed during these HTTP checks.
+
+Browser inventory remains empty and Safari control returns `cgWindowNotFound`.
+This checkpoint does not verify browser sign-in/booking, legacy POST-to-modern
+handoff, staff row edits/deletion/admission or desktop accessibility. Removal of
+compatibility forms remains conditional on those checks.
