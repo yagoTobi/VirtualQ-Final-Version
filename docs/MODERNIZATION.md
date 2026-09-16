@@ -193,6 +193,16 @@ backend tests and six frontend tests. Full row-edit/delete/admission browser
 coverage, smaller web layouts, the legacy Django pages and the remaining audit
 tracks are still required; this checkpoint does not close the full objective.
 
+Recovery checkpoint (16 September): email links and legacy Django confirmation
+links now reach the shared gluestack password form. The installed Android app
+preserves recovery fragments through its native-intent hook. Sign-in, sign-up
+and both recovery screens use full-width native panels with a bounded web card.
+65 backend tests and nine frontend tests pass, as do types, lint and all three
+JavaScript exports. Pixel cold-link/form/keyboard and used-link navigation checks
+passed; submission was tested through HTTP. Desktop, success-screen and
+accessibility coverage remain open, along with the other Django page migrations.
+See [verification evidence](VERIFICATION.md).
+
 ## Git and data handling
 
 Use descriptive commits on the feature branch, review diffs before staging and

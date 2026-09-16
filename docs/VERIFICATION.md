@@ -471,9 +471,45 @@ development state-update warning in Expo Router's initial-link handler
 did not repeat it; Explore and account navigation worked. This remains an
 open startup/deep-link diagnostic, not a suppressed warning or a release claim.
 
+## Shared recovery checkpoint — 16 September 2026
+
+The installed Pixel 10 debug app opened a valid `virtualq://set-password` link
+from a cold launch, checked it with the API and displayed the shared gluestack
+form. The native layout uses the available phone width. With Gboard visible,
+the password fields and update action remained reachable and the bottom tabs
+were hidden. The original keyboard and hardware-keyboard settings were restored.
+
+![Recovery form](verification/android-recovery-form.png)
+![Recovery with keyboard](verification/android-recovery-keyboard.png)
+
+A live HTTP client changed the disposable test account's password. Its previous
+API token was rejected, reuse of the reset link returned 400, and the new password
+signed in successfully. Reopening the used link on the Pixel showed the recovery
+message. Request a new link → Back to sign in → Create an account navigated
+correctly. No new password was entered or submitted through the native UI.
+
+![Used reset link](verification/android-recovery-used.png)
+![Phone sign-in](verification/android-auth-signin.png)
+
+This check exposed two native deep-link issues: Expo Router 57's custom-scheme
+extractor drops fragments, and a global parameter update before the root
+navigator is ready throws on cold launch. The supported native-intent hook now
+preserves the recovery fragment, and the screen updates its own navigator.
+A regression check uses the installed Router extractor. The separate upstream
+initial-link state-update warning described above still occurred on one cold
+launch; it was inspected and dismissed for the form check, not suppressed.
+
+All 65 backend tests, nine frontend tests, system/migration checks, type checking,
+lint and combined web/Android/iOS JavaScript exports passed. No dependency or
+native configuration changed. The live hierarchy audit again found no mismatches.
+Desktop recovery/hydration, UI submission/success, large-font recovery and
+screen-reader checks remain open. Safari's computer-use connection currently
+returns `cgWindowNotFound`; Chrome on the emulator awaits user confirmation of
+its first-run terms. No browser result is inferred from the static export.
+
 ## Checks still required
 
-Reset confirmation needs migration and runtime checks. Staff CRUD is implemented
+Reset confirmation is migrated with the remaining checks listed above. Staff CRUD is implemented
 with the remaining browser coverage listed above. Existing Django booking/authentication pages still need their shared
 visual treatment. Visitor forms need a desktop web walkthrough. Additional
 large-font and smaller-phone coverage beyond the map, screen-reader and
