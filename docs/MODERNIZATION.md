@@ -19,7 +19,7 @@ The historical database is preserved locally; migrations run against the separat
 | Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | Runtime/build gates and CI passed |
 | Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Accounts, visits, guests, plans, ride passes and scanner migrated; remaining web pages/checks pending |
 | Operations | All management resources below have authorized search, forms, validation and confirmations | Implemented; complete browser coverage and narrow-layout checks pending |
-| Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | 62 backend tests pass; remaining audit tracks open |
+| Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | 65 backend tests pass; remaining audit tracks open |
 | Product verification | Browser and Pixel 10 critical-flow walkthrough, mobile/desktop screenshots, build checks | Pixel/native binary and partial browser evidence recorded; full workflow matrix pending |
 | Delivery | Small commits, reviewable PR, passing CI, setup/architecture/audit/maintenance docs | Stacked draft PRs and documentation maintained throughout; final delivery pending |
 
@@ -204,6 +204,14 @@ accessibility coverage remain open, along with the other Django page migrations.
 See [verification evidence](VERIFICATION.md).
 
 ## Git and data handling
+
+The installed-app walkthrough continued on
+`codex/virtualq-mobile-flow-feedback`, based on recovery PR #14. It found and
+fixed guest-save feedback and map-origin reservation completion. Sign-in,
+profile/group updates, booking, QR display and cancellation were exercised with
+a disposable visitor; the visitor and all attached test data were removed.
+Native screenshots, the reproduced navigation failure and remaining checks are
+recorded in [VERIFICATION.md](VERIFICATION.md).
 
 Use descriptive commits on the feature branch, review diffs before staging and
 push without force. Open a PR with test evidence and screenshots, then check CI.
