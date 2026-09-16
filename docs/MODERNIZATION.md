@@ -17,9 +17,9 @@ The historical database is preserved locally; migrations run against the separat
 | --- | --- | --- |
 | Baseline | Clean checkpoint; inventory and plan committed | Recorded |
 | Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | Runtime/build gates and CI passed |
-| Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Accounts, visits, guests, plans, ride passes and scanner migrated; remaining web pages/checks pending |
+| Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Shared visitor screens and legacy web entry redirects implemented; browser parity and accessibility coverage pending |
 | Operations | All management resources below have authorized search, forms, validation and confirmations | Implemented; complete browser coverage and narrow-layout checks pending |
-| Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | 65 backend tests pass; remaining audit tracks open |
+| Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | 67 backend tests pass; remaining audit tracks open |
 | Product verification | Browser and Pixel 10 critical-flow walkthrough, mobile/desktop screenshots, build checks | Pixel/native binary and partial browser evidence recorded; full workflow matrix pending |
 | Delivery | Small commits, reviewable PR, passing CI, setup/architecture/audit/maintenance docs | Stacked draft PRs and documentation maintained throughout; final delivery pending |
 
@@ -209,6 +209,17 @@ opened Django forms retain their POST behavior until browser parity is verified.
 67 backend tests pass, including trusted-origin redirects, no-cache responses,
 legacy authentication and the existing booking/reduction rules. Live HTTP checks
 reach the frontend HTML; this does not establish browser interaction parity.
+
+Phone accessibility and flow checkpoint (16 September): the installed Android
+app retains complete tab labels at 320 × 560 dp with 160% text size. Shared
+input outlines and select placeholders use contrast-checked semantic colors.
+Native registration returned to the requesting Tickets screen, and sign-in from
+a protected ride returned to that reservation form. Explore-origin and
+Plans-stack reservation completion both passed, including an overlapping-time
+unavailable state. The temporary visitor, ticket and two reservations were
+removed, and the demo session was restored. See [accessibility](ACCESSIBILITY.md),
+[runtime evidence](VERIFICATION.md) and the measured debug navigation sample in
+[performance](PERFORMANCE.md). Browser and screen-reader verification remain open.
 
 ## Git and data handling
 
