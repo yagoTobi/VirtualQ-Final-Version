@@ -96,6 +96,7 @@ jobs:
     env:
       CI: "1"
       DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
+      EXPO_PUBLIC_API_URL: http://127.0.0.1:8000
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-node@v7.0.0
@@ -136,4 +137,80 @@ jobs:
             frontend/build/VirtualQ.app.tar.gz
             frontend/ios/Podfile.lock
           if-no-files-found: error
+          retention-days: 7
+
+  ios-startup:
+    needs: ios
+    runs-on: macos-26
+    timeout-minutes: 10
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_26.4.1.app/Contents/Developer
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-python@v7.0.0
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - uses: actions/download-artifact@v8.0.1
+        with:
+          name: virtualq-ios-arm64-simulator-release
+          path: ${{ runner.temp }}/virtualq-ios-app
+      - name: Launch the release app against an isolated demo backend
+        shell: bash
+        env:
+          DJANGO_DATABASE_PATH: ${{ runner.temp }}/virtualq-ios-startup.sqlite3
+          VIRTUALQ_IOS_ARTIFACT: ${{ runner.temp }}/virtualq-ios-app
+          VIRTUALQ_IOS_EVIDENCE: ${{ runner.temp }}/virtualq-ios-startup-evidence
+        run: |
+          set -euo pipefail
+          mkdir -p "$VIRTUALQ_IOS_EVIDENCE"
+          tar -xzf "$VIRTUALQ_IOS_ARTIFACT/build/VirtualQ.app.tar.gz" -C "$VIRTUALQ_IOS_ARTIFACT"
+          xcrun simctl list devices available --json > "$VIRTUALQ_IOS_EVIDENCE/devices.json"
+          read -r vq_simulator vq_state < <(python - "$VIRTUALQ_IOS_EVIDENCE/devices.json" <<'PY'
+          import json, sys
+          with open(sys.argv[1]) as source:
+              devices = json.load(source)["devices"]["com.apple.CoreSimulator.SimRuntime.iOS-26-4"]
+          device = next(device for device in devices if device["name"] == "iPhone 17")
+          print(device["udid"], device["state"])
+          PY
+          )
+          python manage.py migrate --noinput
+          python manage.py seed_demo
+          python manage.py runserver 127.0.0.1:8000 --noreload > "$VIRTUALQ_IOS_EVIDENCE/backend.log" 2>&1 &
+          vq_backend_pid=$!
+          trap 'kill "$vq_backend_pid" 2>/dev/null || true; xcrun simctl shutdown "$vq_simulator" 2>/dev/null || true' EXIT
+          for attempt in {1..30}; do
+            if curl -fsS http://127.0.0.1:8000/api/parkRides/theme_parks/ > /dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8000/api/parkRides/theme_parks/ > /dev/null
+          if [ "$vq_state" != "Booted" ]; then xcrun simctl boot "$vq_simulator"; fi
+          xcrun simctl bootstatus "$vq_simulator" -b
+          xcrun simctl install "$vq_simulator" "$VIRTUALQ_IOS_ARTIFACT/VirtualQ.app"
+          xcrun simctl launch --terminate-running-process "$vq_simulator" com.virtualq.app | tee "$VIRTUALQ_IOS_EVIDENCE/launch.txt"
+          vq_received=false
+          for attempt in {1..30}; do
+            if grep -Fq 'GET /api/parkRides/theme_park_rides/ HTTP/1.1" 200' "$VIRTUALQ_IOS_EVIDENCE/backend.log"; then
+              vq_received=true
+              break
+            fi
+            sleep 1
+          done
+          sleep 3
+          xcrun simctl io "$vq_simulator" screenshot "$VIRTUALQ_IOS_EVIDENCE/explore-initial.png"
+          # Allow transient simulator welcome notifications to disappear.
+          sleep 8
+          xcrun simctl io "$vq_simulator" screenshot "$VIRTUALQ_IOS_EVIDENCE/explore.png"
+          if [ "$vq_received" != true ]; then
+            echo "::error::The iOS app did not fetch the ride catalog successfully."
+            exit 1
+          fi
+      - name: Upload iOS startup evidence
+        if: always()
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: virtualq-ios-startup-evidence
+          path: ${{ runner.temp }}/virtualq-ios-startup-evidence
+          if-no-files-found: warn
           retention-days: 7

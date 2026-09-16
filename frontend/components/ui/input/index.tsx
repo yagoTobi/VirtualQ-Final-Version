@@ -31,7 +31,7 @@ const inputSlotStyle = tva({
 });
 
 const inputFieldStyle = tva({
-  base: "flex-1 text-foreground text-base py-1 h-full placeholder:text-muted-foreground  web:outline-none  web:cursor-text web:data-[disabled=true]:cursor-not-allowed",
+  base: "flex-1 text-foreground text-base py-1 h-full web:outline-none web:cursor-text web:data-[disabled=true]:cursor-not-allowed",
 });
 
 type IInputProps = React.ComponentProps<typeof UIInput> &
@@ -101,6 +101,7 @@ const InputField = React.forwardRef<TextInput, IInputFieldProps>(
     return (
       <NativeInputField
         ref={ref}
+        placeholderTextColorClassName="accent-muted-foreground"
         {...props}
         className={inputFieldStyle({
           class: className,

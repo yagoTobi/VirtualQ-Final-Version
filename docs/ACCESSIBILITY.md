@@ -4,7 +4,8 @@
 
 This checkpoint reviews shared form colors and compact Android layouts. It is
 not a WCAG conformance statement. Runtime evidence uses the installed VirtualQ
-debug app on the Pixel 10 emulator; web and iOS runtime coverage remains open.
+debug app on the Pixel 10 emulator and the first CI iPhone 17 startup capture.
+Broader web and iOS runtime coverage remains open.
 
 ## Form contrast
 
@@ -60,6 +61,32 @@ recorded in [verification](VERIFICATION.md#compact-phone-and-large-text-checks--
 The prior navigation check verified Android reduced-motion changes while the app
 was mounted. See [performance evidence](PERFORMANCE.md#navigation-continuity--15-september-2026).
 This does not establish screen-reader reading order or announcements.
+
+## Native placeholder color — 16 September 2026
+
+The first iOS startup screenshot (PR #23, run `35057206466`, commit `a451c90`)
+exposed a gap between the declared token ratios above and the actual native
+rendering. The search placeholder used the iOS default color, RGB
+`197, 197, 199`, on white: **1.72:1**. The `placeholder:` CSS utility did not
+populate the native TextInput color prop.
+
+Both shared InputField and SelectInput now use UniWind's built-in
+`placeholderTextColorClassName="accent-muted-foreground"`. This maps the
+existing semantic token to the native/web color prop, retains explicit caller
+overrides, and avoids a separate color resolver or hardcoded color. The input's
+native focus ref remains unchanged.
+
+After a fresh Metro bundle and app restart, the Pixel screenshot contains the
+intended RGB `83, 102, 96` text on white: **6.11:1**. Entering “Python” filters
+the list to one ride; clearing the field restores all three. These checks cover
+the shared input's Android rendering and editing. The select is currently used
+by web staff forms, whose browser interaction checks remain open.
+
+![Android search placeholder after the fix](verification/android-placeholder-color.png)
+
+Pixel and iOS measurements use solid text pixels inside the search field, not
+antialiased edges. PR #23's startup artifacts provide subsequent iOS captures
+for visual inspection; CI's catalog assertion alone does not prove contrast.
 
 ## Long reservation names — 16 September 2026
 
