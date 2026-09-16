@@ -69,6 +69,34 @@ not verification of a deployed production web server.
 - A database read confirmed the restaurant edit, matching park/area IDs,
   opening hours and product price. A fresh hierarchy audit reported zero
   mismatches across rides, restaurants, stores and employees.
+- `QA Gardener` was created under Park 2 / Area 2 with birth and joining dates,
+  a 09:00–17:00 shift and Ride workplace. Reopening retained those values, and
+  editing the job title saved. Optional email and phone fields stored `NULL`.
+- A ticket for `demo-admin` was created for 18 September, found by username,
+  then moved to 16 September before reservations existed. Owner and party
+  position were displayed as immutable values.
+- A second ticket at party position 1 created its linked guest automatically.
+  The submitted visit date and the guest's date both stored 16 September.
+  Editing the guest's name, age and height saved and appeared in the list.
+  Its ticket is now read-only in the editor, matching the existing backend
+  rule against guest reassignment; another height edit still saved.
+- A Python Plunge reservation for that guest stored 16 September,
+  15:00–15:05. Attempting admission before the booked time was rejected with
+  explicit time-window feedback and left the reservation unadmitted.
+
+## Typed dates and immutable guest tickets
+
+Typing `1` then `8` into an existing ticket's day segment produced `8` with
+the controlled date input. Replacing `value` with `defaultValue` on the browser
+date/time fields allows the browser to retain partially typed segments while
+`onChange` still updates the submitted form values. Repeating the same sequence
+produced `18`; full year entry, a newly typed guest-ticket date, and a reservation
+time also saved correctly. No browser clock or system date was changed.
+
+The guest editor previously offered a ticket picker despite the API rejecting
+guest reassignment. The schema now marks that relationship immutable after
+creation, so the shared form displays its name and omits it from edit payloads.
+The API's validation and permissions remain in force.
 
 ## Relationship labels
 
@@ -92,9 +120,9 @@ than inventing a name. No endpoint permissions were expanded.
 | Maintenance | Change saved; filter and visitor presentation pending |
 | Restaurants | Create, reopen and edit passed; deletion pending |
 | Stores and products | Create, product edit/validation and cascade preview passed; deletion pending |
-| Employees | Pending |
-| Tickets and guests | Pending |
-| Reservations and admission | Pending |
+| Employees | Create, reopen and edit passed; deletion pending |
+| Tickets and guests | Create/edit and immutable ownership passed; reservation-related date guard and deletion pending |
+| Reservations and admission | Create and early-admission rejection passed; edit, conflict, successful admission and deletion pending |
 | Restricted staff and visitor permissions | Ride-only staff and direct-route denial passed; visitor denial pending |
 | Visitor authentication, profile, booking, passes and cancellation | Pending in browser |
 | Recovery submission | Requires user handoff for entering a changed credential |
@@ -106,6 +134,11 @@ Type checking, linting, all nine frontend tests and the web export passed after
 the label and read-only presentation changes. The export is build evidence;
 the walkthrough used the development preview.
 
+After the date-input and guest-metadata fixes, type checking, linting, the web
+export and nine frontend tests passed again. The local backend suite ran 67 tests successfully
+with four database-specific checks skipped on SQLite; PostgreSQL checks remain
+part of CI.
+
 ## Screenshots
 
 - [Saved relationship names](verification/web-ride-editor-labels.png)
@@ -113,6 +146,8 @@ the walkthrough used the development preview.
 - [Restricted resource route](verification/web-restricted-route.png)
 - [Readable view-only values](verification/web-read-only-labels.png)
 - [Store and product deletion preview](verification/web-store-cascade-preview.png)
+- [Guest ticket locked during edits](verification/web-guest-ticket-locked.png)
+- [Admission outside the booked window rejected](verification/web-early-admission-rejected.png)
 
 Backend logs and additional screenshots are retained with the isolated fixture
 while the walkthrough continues. No destructive UI deletion has been performed.
