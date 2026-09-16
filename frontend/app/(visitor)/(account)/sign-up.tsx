@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { Page } from "@/components/page";
 import { Field } from "@/components/field";
 import { ErrorMessage } from "@/components/feedback";
-import { Card } from "@/components/ui/card";
+import { AuthPanel } from "@/components/auth-panel";
 import { VStack } from "@/components/ui/vstack";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
@@ -69,7 +69,7 @@ export default function SignUp() {
 
   return (
     <Page>
-      <Card size="sm" className="w-full max-w-lg self-center p-5 md:p-8">
+      <AuthPanel>
         <VStack space="sm">
           <Heading size="2xl">Your next park day.</Heading>
           <Text className="text-muted-foreground">
@@ -203,7 +203,7 @@ export default function SignUp() {
         >
           <ButtonText>Already have an account? Sign in</ButtonText>
         </Button>
-      </Card>
+      </AuthPanel>
     </Page>
   );
 }

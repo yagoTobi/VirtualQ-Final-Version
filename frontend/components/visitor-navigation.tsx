@@ -50,6 +50,7 @@ const screenTitles: Record<string, string> = {
   "sign-in": "Sign in",
   "sign-up": "Create account",
   "reset-password": "Reset password",
+  "set-password": "New password",
   "ride/[id]": "Ride details",
   "reserve/[id]": "Reserve a ride",
   "reservation/[id]": "Ride pass",

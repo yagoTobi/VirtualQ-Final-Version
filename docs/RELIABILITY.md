@@ -55,7 +55,32 @@ old token, allowed sign-out and accepted the new password.
 These guards apply to model saves; bulk updates and raw SQL bypass them. Change
 passwords through Django's password forms or `set_password()` followed by `save()`.
 SQLite is the verified database; PostgreSQL lock behavior has not been tested.
-This is not a redesign of the remaining Django authentication templates.
+The shared recovery form is covered in the following checkpoint.
+
+### Shared account recovery — 16 September
+
+Reset emails now target the configured visitor origin, rather than deriving the
+destination from the request's Host header. Their credentials use a URL fragment,
+not query parameters. The frontend captures the fragment in memory and clears
+the current route parameters; it does not store the link in persistent storage.
+Legacy Django confirmation URLs redirect to that form with `no-store` and
+`no-referrer` headers, including already-open session-based reset links.
+
+Separate throttled POST endpoints check the link and confirm the password using
+Django's existing token generator, password validators and `SetPasswordForm`.
+Confirmation locks the account, rechecks the link and saves inside a transaction.
+Concurrent confirmation requests have exactly one successful response. Neither
+checking a link nor rejecting a weak password consumes it. Responses are not
+cacheable; inactive accounts, malformed/expired links and replay are rejected.
+These endpoints ignore an old Authorization header so recovery still works after
+the existing API credential has been revoked.
+
+All 65 backend tests pass against disposable file-backed SQLite. A live synthetic
+account was checked and reset through HTTP; its old API token failed, replay
+failed, and the new password signed in successfully. The temporary account and
+its tokens were removed afterward. The historical database and demo account were
+not changed. Native form rendering and used-link handling were separately checked
+on Pixel 10; UI submission and desktop recovery remain unverified.
 
 ## Reservation correctness
 

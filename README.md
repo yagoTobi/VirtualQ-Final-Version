@@ -104,12 +104,12 @@ For a detailed view of the class structure and interactions, refer to the follow
 
 The migration lives in `frontend/`: Expo 57, React Native 0.86 and gluestack v5.
 It currently includes phone-first Explore/search, ride details, a provisional map,
-registration/sign-in/reset requests, profile editing, visit booking, ticket QR
+registration/sign-in/password recovery, profile editing, visit booking, ticket QR
 passes, guest details, group ride reservations, cancellation and ticket scanning.
 Native tabs retain their screens, dates and passes, and secure sessions survive
 restarts. The staff workspace now covers the management resources with
 permission-aware APIs and forms. Its full browser walkthrough and the existing
-Django booking/reset pages remain in progress. See
+Django booking/authentication pages remain in progress. See
 [the plan](docs/MODERNIZATION.md) and [native evidence](docs/VERIFICATION.md).
 
 With Python 3.12 and Node 22 installed:
@@ -137,6 +137,23 @@ below. `CI=1` disables Metro watching on this Mac; restart after source edits.
 For an installed Android app, see [native build setup](docs/NATIVE_BUILDS.md).
 This uses JDK 17 and the generated Expo Android project. The debug APK requires
 Metro; it is a separate app from Expo Go.
+
+### Password recovery
+
+Set `VIRTUALQ_WEB_ORIGIN` in `.env.local` to the visitor frontend's origin
+(default `http://localhost:8081`). Include that origin in
+`CORS_ALLOWED_ORIGINS`. For another device, use an address it can reach; a
+production deployment needs its public HTTPS origin and working email delivery.
+
+Reset emails open `/set-password` in the shared visitor app. The credential is
+carried in the URL fragment, checked through a POST request, and removed from the
+current navigation URL after capture. Refreshing the cleared page requires
+reopening the email link. Django validates the password and invalidates other
+API sessions when it changes. Old Django reset links redirect to the same form.
+The installed Android app also accepts `virtualq://set-password#uid=…&token=…`;
+verified HTTPS app links and production email delivery remain deployment work.
+Local email uses the configured console backend, so its output contains reset
+credentials: keep it private and never attach it to an issue or commit.
 
 ### Staff workspace
 
