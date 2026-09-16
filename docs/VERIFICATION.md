@@ -572,3 +572,18 @@ long-history checks remain.
 Avatar selection is intentionally consolidated into initials until usable assets
 exist, as recorded in the migration plan. No physical device, iOS simulator,
 native release binary or app-store installation has been verified.
+## Selected native tab shape — 16 September 2026
+
+The installed Pixel 10 app initially rendered Explore's selected background as
+a capsule, but switching to another tab produced square corners. Returning to
+Explore also lost its rounding. The five icon containers now use
+`collapsable={false}` so inactive, unpainted containers retain their native views.
+The radius and shared color tokens are unchanged.
+
+After restarting Metro and the app, Explore → Map → Plans → Tickets → You →
+Explore → Map preserved the rounded highlight on every selected tab. Screenshots
+below show the original Map failure and each corrected state. Type checking,
+lint and all nine frontend tests passed. This is installed Android debug
+verification; iOS runtime and release performance were not measured.
+
+![Native tab highlights before and after the fix](verification/android-tab-shape.png)
