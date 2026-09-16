@@ -11,6 +11,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from unittest.mock import patch
+from secrets import token_urlsafe
 
 
 class UserTest(TestCase):
@@ -109,7 +110,7 @@ class UserTest(TestCase):
         self.assertEqual(weak.status_code, 200)
         self.assertTrue(weak.context["form"].errors)
         self.assertEqual(self.api_client.get(reverse("user_info")).status_code, 200)
-        password = "New-visitor-password-2026!"
+        password = token_urlsafe(24)
         response = self.client.post(form_url, {
             "new_password1": password, "new_password2": password,
         })
@@ -131,13 +132,14 @@ class UserTest(TestCase):
         self.user1.name = "Updated"
         self.user1.save()
         self.assertEqual(Token.objects.get(user=self.user1).key, key)
-        self.user1.set_password("Not-saved-yet-2026!")
+        self.user1.set_password(token_urlsafe(24))
         self.user1.save(update_fields=["name"])
         self.assertEqual(Token.objects.get(user=self.user1).key, key)
         self.user1.refresh_from_db()
+        password = token_urlsafe(24)
         form = AdminPasswordChangeForm(self.user1, {
-            "password1": "Admin-changed-password-2026!",
-            "password2": "Admin-changed-password-2026!",
+            "password1": password,
+            "password2": password,
             "usable_password": "true",
         })
         self.assertTrue(form.is_valid(), form.errors)
@@ -153,7 +155,7 @@ class UserTest(TestCase):
         stale_user = CustomUser.objects.get(pk=self.user1.pk)
 
         def reset_before_issuing_token(**kwargs):
-            self.user1.set_password("Password-changed-during-login-2026!")
+            self.user1.set_password(token_urlsafe(24))
             self.user1.save(update_fields=["password"])
             return stale_user
 
@@ -167,7 +169,7 @@ class UserTest(TestCase):
     def test_password_change_and_token_revocation_roll_back_together(self):
         original = self.user1.password
         key = Token.objects.get(user=self.user1).key
-        self.user1.set_password("Must-not-survive-rollback-2026!")
+        self.user1.set_password(token_urlsafe(24))
         with patch("django.db.models.query.QuerySet.delete", side_effect=RuntimeError("revocation failed")):
             with self.assertRaisesMessage(RuntimeError, "revocation failed"):
                 self.user1.save(update_fields=["password"])
@@ -177,7 +179,7 @@ class UserTest(TestCase):
 
     def test_in_flight_profile_update_cannot_restore_an_old_password(self):
         stale_user = CustomUser.objects.get(pk=self.user1.pk)
-        password = "Password-reset-before-profile-save-2026!"
+        password = token_urlsafe(24)
         self.user1.set_password(password)
         self.user1.save(update_fields=["password"])
         self.api_client.force_authenticate(user=stale_user)
