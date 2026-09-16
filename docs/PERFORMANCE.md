@@ -144,3 +144,32 @@ not installed disk use, memory consumption or release download size.
 Debug signing, Metro-delivered JavaScript and development tooling make it
 unsuitable for release FPS or cold-start comparisons. Release profiling and
 ELF alignment review remain open.
+
+## Installed-app navigation sample — 16 September 2026
+
+Pixel 10, installed arm64 debug app, Metro development bundle with tab fitting,
+1080 × 2424 px, density 420 and font scale 1.0. The local API contained the same
+three demo rides. The measured interaction was Explore → Map → pin 2 →
+Java Jamboree details. Each action's native accessibility state was checked.
+
+React DevTools recorded 21 commits. The largest was the initial Map navigation:
+88.243 ms inclusive and 83.619 ms summed exclusive work. Its largest exclusive
+component was `Animated(Anonymous)` at 30.008 ms, followed by navigation `Content`
+at 6.859 ms. NextPlan rendered seven times, including focus/visibility and request
+updates; Map rendered five times, including initial loading and pin selection.
+
+Android graphics counters were reset immediately before the recording. They
+reported 69 rendered frames, seven deadline misses (10.14%), a 20 ms 95th
+percentile and a 65 ms 99th percentile. The operator-driven recording lasted
+14.4 seconds, which includes pauses and must not be divided into a frame-rate
+estimate or treated as startup time.
+
+This supplies native frame evidence alongside the React trace. It is one
+development-build sample with the profiler attached, not release performance or
+proof of improvement over the earlier Expo Go traces. No memoization, renderer
+or animation-library change was inferred from it. Repeat matched release-like
+measurements before targeting the navigation work.
+
+Raw data stays ignored in `.local/verification/profiles/`:
+`installed-map-detail.json`, `installed-map-framestats.txt` and
+`installed-map-reset.txt`.
