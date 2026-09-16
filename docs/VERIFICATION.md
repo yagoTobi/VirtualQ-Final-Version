@@ -1,5 +1,27 @@
 # Product verification
 
+## Password-change session checks — 16 September 2026
+
+On `codex/virtualq-session-revocation`, the installed `com.virtualq.app` Android
+debug binary loaded the updated JavaScript from Metro on Pixel 10:
+
+- Signed in as a newly created synthetic visitor.
+- Submitted the live Django reset confirmation using an HTTP client with the
+  session cookie and CSRF token. This was not a browser form walkthrough.
+- Confirmed the old API token was removed and Tickets refused the old session.
+- Signed out successfully despite the already-revoked token.
+- Signed in on Pixel with the changed password and reached the correct account.
+- Removed the temporary visitor and its token after checking it had no tickets.
+
+All 62 backend tests passed with a disposable file-backed SQLite database,
+including the existing concurrency cases. System checks, migration-drift checks,
+type checking, lint and seven frontend tests passed. The final session-error copy
+is covered by the shared API test; this checkpoint introduces no layout changes.
+
+Desktop browser inspection remains open: both Safari and Zen control returned
+`cgWindowNotFound`. Password reset templates, the remaining staff browser flows,
+release signing, iOS and physical-device checks retain their earlier limitations.
+
 ## Foundation — 15 September 2026
 
 Environment: Pixel 10 Android Studio emulator, Android 17 / API 37, arm64,

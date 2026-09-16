@@ -24,6 +24,39 @@ migration drift. Regression coverage includes reset non-disclosure, weak passwor
 and birth-date validation, token revocation, public write denial and model-specific
 staff access. Existing restoration flows remain covered.
 
+### Password changes and existing app sessions — 16 September
+
+The Django reset confirmation previously changed the password while leaving the
+DRF API token valid. The same gap affected password changes through Django admin.
+`CustomUser.save()` now revokes the token when a stored password hash changes,
+inside the same transaction as the password save. This also covers disabling a
+password. Creation still issues the initial token, and ordinary profile edits
+retain it. Password-hasher upgrades conservatively revoke an existing token too;
+a successful login then issues a new one.
+
+Login locks and rechecks the authenticated account before issuing a token, so
+an intervening reset or account deactivation cannot issue a credential using stale
+authentication results. Profile updates write only their submitted fields:
+a reproduced in-flight profile save previously restored the old password hash
+after a reset.
+
+The app can now sign out when the server has already revoked its token. Other
+logout failures remain visible. Unauthorized responses explain that the session
+has ended and ask the visitor to sign out and sign in again.
+
+Verification: all **62 backend tests**, including the file-backed SQLite
+concurrency cases, pass; system and migration-drift checks pass. New regressions
+cover reset/replay/weak-password behavior, admin changes, ordinary profile saves,
+stale authentication and profile writes, and rollback if token revocation fails.
+Seven frontend tests, type checking and lint pass. A synthetic visitor completed
+the live Django reset with CSRF through an HTTP client; Pixel 10 then rejected the
+old token, allowed sign-out and accepted the new password.
+
+These guards apply to model saves; bulk updates and raw SQL bypass them. Change
+passwords through Django's password forms or `set_password()` followed by `save()`.
+SQLite is the verified database; PostgreSQL lock behavior has not been tested.
+This is not a redesign of the remaining Django authentication templates.
+
 ## Reservation correctness
 
 Booking rules now live on `RideReservation`, shared by the visitor API and Django
