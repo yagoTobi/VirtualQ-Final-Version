@@ -483,7 +483,7 @@ export function RecordEditor({
                               <input
                                 aria-labelledby={`edit-${name}`}
                                 type={field.type}
-                                value={String(value)}
+                                defaultValue={String(value)}
                                 className={inputClass}
                                 required={field.required}
                                 onChange={(event) =>
