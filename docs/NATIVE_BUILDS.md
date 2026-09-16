@@ -59,7 +59,7 @@ is still outstanding.
 The arm64 debug APK is a development app, needs Metro, and uses the generated
 debug signing key. It is separate from Expo Go and has its own stored session.
 It is not an app-store release or an offline standalone build. Release signing,
-an HTTPS API environment, other Android ABIs and iOS binaries need separate
+an HTTPS API environment, other Android ABIs and physical iPhone builds need separate
 verification.
 
 ## CI artifact
@@ -91,8 +91,30 @@ tar -xzf .local/ios-artifact/build/VirtualQ.app.tar.gz -C .local/ios-artifact
 
 The archive preserves the app's executable permissions. The artifact also
 includes the generated `ios/Podfile.lock` for the pod versions used in that run.
-Pod version locking across future rebuilds will be established after the first
-successful native build. On a Mac with Xcode and a booted arm64 simulator:
+The committed `frontend/Podfile.lock` comes from the first successful native
+build. CI copies it into the generated project and uses `pod install --deployment`
+so dependency or Podfile drift fails instead of silently changing the lock.
+
+For a local build, install CocoaPods 1.17.0 with
+`gem install cocoapods --version 1.17.0 --no-document`. Generate the project and
+restore the lock before installing pods (run from `frontend/` with Xcode selected):
+
+```sh
+npm ci
+npx expo prebuild --platform ios --no-install
+cp Podfile.lock ios/Podfile.lock
+cd ios
+pod _1.17.0_ install --deployment
+```
+
+Keep the committed lock outside the generated `ios/` directory so a clean
+prebuild does not remove it. When intentionally upgrading npm/native packages
+or changing the generated Podfile, run `pod _1.17.0_ install` without deployment
+mode, review its changes and copy `ios/Podfile.lock` back to `frontend/Podfile.lock`.
+Commit it with the package/configuration change and verify the native CI build.
+Do not update pods independently of the pinned Expo/React Native dependency set.
+
+From the repository root, on a Mac with Xcode and a booted arm64 simulator:
 
 ```sh
 xcrun simctl install booted .local/ios-artifact/VirtualQ.app
@@ -102,8 +124,26 @@ xcrun simctl launch booted com.virtualq.app
 The JavaScript bundle uses the app's configured API address. With the default
 local address, run the Django backend on that Mac before using data-dependent
 screens. The current development machine has command-line tools but no Xcode.
-Local iOS project generation passes; the first CI build and simulator runtime
-verification are pending.
+Local iOS project generation passes; simulator runtime verification is pending.
+
+### First verified artifact — 16 September 2026
+
+PR #18 commit `f7fda6b`, Actions run `35049875243`, passed all checks. Native
+compilation, architecture verification and artifact upload succeeded. The app
+was downloaded and inspected locally:
+
+- Tarball: 12,273,502 bytes; SHA-256
+  `ff35b57360fa81eabaab84449b727c359b36c281959c18f96618576ad76f36f8`.
+- Executable: arm64, 18,005,080 bytes, executable permissions retained.
+- Bundled JavaScript: 3,462,151 bytes.
+- Bundle identifier `com.virtualq.app`, platform `iPhoneSimulator`, minimum iOS
+  16.4, Xcode 26.4.1; light appearance and the `virtualq` URL scheme are present.
+
+The generated Podfile checksum matches the local generated project. The lock
+replay with deployment mode is a subsequent CI check; this first artifact was
+built before that enforcement was added. No simulator launch, physical iPhone
+installation, network behavior, signing/distribution or release performance was
+verified by inspecting the archive.
 
 ## Appearance and permissions
 
