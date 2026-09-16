@@ -1,6 +1,5 @@
 import random
 import heapq
-import numpy as np
 
 simulation_time = 480  # in minutes (8 hours)
 
@@ -23,11 +22,11 @@ class Event:
 
 
 def generate_inter_arrival_time():
-    return np.random.exponential(scale=3)
+    return random.expovariate(1 / 3)
 
 
 def generate_service_time():
-    return np.random.uniform(low=2, high=5)
+    return random.uniform(2, 5)
 
 
 def generate_customer(arrival_time):

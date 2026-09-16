@@ -172,19 +172,8 @@ def get_guest_by_ticket(request):
 
 class AvatarURLsView(APIView):
     def get(self, request, *args, **kwargs):
-        PICTURE_CHOICES = [
-            ("boy_1", "Boy 1"),
-            ("boy_2", "Boy 2"),
-            ("boy", "Boy"),
-            ("catwoman", "Catwoman"),
-            ("girl_1", "Girl 1"),
-            ("girl_2", "Girl 2"),
-            ("girl", "Girl"),
-            ("punk", "Punk"),
-            ("woman", "Woman"),
-        ]
         urls = {
             id: request.build_absolute_uri(static(f"ticketApp/profile_icons/{id}.png"))
-            for id, _ in PICTURE_CHOICES
+            for id, _ in Guest.PICTURE_CHOICES
         }
         return JsonResponse(urls)
