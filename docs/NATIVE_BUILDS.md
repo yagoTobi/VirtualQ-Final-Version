@@ -130,7 +130,27 @@ xcrun simctl launch booted com.virtualq.app
 The JavaScript bundle uses the app's configured API address. With the default
 local address, run the Django backend on that Mac before using data-dependent
 screens. The current development machine has command-line tools but no Xcode.
-Local iOS project generation passes; simulator runtime verification is pending.
+Local iOS project generation passes; the startup job below exercises the built
+artifact on CI's simulator.
+
+### CI startup check
+
+After a successful iOS build, `ios-startup` downloads that run's artifact on a
+separate macOS runner and boots the installed iPhone 17 / iOS 26.4 simulator.
+The CI app bundle explicitly targets `http://127.0.0.1:8000`. Django runs there
+with a newly migrated, seeded database under the runner's temporary directory.
+No historical database or developer account is used.
+
+The check installs and launches the Release app, waits for its successful ride
+catalog request, and captures the first screen. Its readiness probe requests
+parks, so that probe cannot satisfy the app's ride-request assertion. The backend
+and simulator stop afterward. The `virtualq-ios-startup-evidence` artifact
+contains the screenshot, simulator inventory, launch result and backend request
+log; inspect the screenshot before claiming the layout was verified.
+
+The automated assertion covers startup and public catalog connectivity, not iOS
+authentication, booking, camera, accessibility, release FPS or physical-device
+behavior. A passing job still requires visual inspection of its screenshot.
 
 ### First verified artifact — 16 September 2026
 
