@@ -61,12 +61,30 @@ The prior navigation check verified Android reduced-motion changes while the app
 was mounted. See [performance evidence](PERFORMANCE.md#navigation-continuity--15-september-2026).
 This does not establish screen-reader reading order or announcements.
 
+## Long reservation names — 16 September 2026
+
+At 320 × 560 dp and font scale 1.6, keeping the pass action beside the details
+squeezed a long visitor name and date into a narrow column. The gluestack HStack
+now wraps, and the text column has a minimum width, so the action moves below
+the details when space is limited. The normal Pixel layout keeps the action
+beside the text. Both layouts were visually inspected in the installed app.
+
+![Plans layout with large text](verification/android-plans-large-text.png)
+
+The 120-reservation fixture also exposed repeated accessible button names for
+the same visitor and ride. Pass actions now include the visit date, start time
+and time zone. The final native accessibility snapshot distinguishes, for
+example, Python Plunge at 09:00 and 10:00 on 17 September, and 09:00 on
+18 September. This verifies exposed labels, not TalkBack speech or reading order.
+The fixture was removed and phone size/font settings restored after verification.
+
 ## Remaining checks
 
 - TalkBack and VoiceOver: reading order, field/error associations, live feedback,
   route changes, dialog focus and selection announcements.
 - Browser keyboard navigation, visible focus, zoom/reflow and staff tables/forms.
-- Complete large-text coverage, including long translated names and histories.
+- Complete large-text coverage, including translated names; the Plans sample
+  above covers one long English name and 120 upcoming reservations.
 - Docked keyboard at compact phone dimensions and iOS keyboard/safe-area behavior.
 - Runtime contrast for every state, including selection sheets and custom
   background overrides. Dark-mode runtime verification before exposing a theme
