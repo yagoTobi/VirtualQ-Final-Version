@@ -76,4 +76,13 @@ test("authentication, JSON errors and empty responses retain their contract", as
     await empty.api("/booking/1/", null, { method: "DELETE" }),
     undefined,
   );
+  const revoked = client(async () => ({
+    status: 401,
+    ok: false,
+    text: async () => '{"detail":"Invalid token."}',
+  }));
+  await assert.rejects(
+    revoked.api("/tickets/", "revoked-token"),
+    (error) => error.status === 401 && /Sign out, then sign in again/.test(error.message),
+  );
 });

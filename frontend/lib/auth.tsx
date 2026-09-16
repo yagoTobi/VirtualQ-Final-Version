@@ -77,7 +77,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(profile);
   }
   async function signOut() {
-    if (token) await api("/api/clients/logout/", token, { method: "POST" });
+    if (token) {
+      try {
+        await api("/api/clients/logout/", token, { method: "POST" });
+      } catch (error) {
+        // A reset or another session may already have revoked this token.
+        if (!(error instanceof ApiError && error.status === 401)) throw error;
+      }
+    }
     await storage.set(null);
     setToken(null);
     setUser(null);
