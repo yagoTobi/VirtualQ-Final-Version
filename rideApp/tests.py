@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 from io import StringIO
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase, override_settings
@@ -102,7 +103,10 @@ class LocalDemoTest(TestCase):
 
     def test_web_ticket_booking_and_admin_login(self):
         response = self.client.get(reverse("book_visit"))
-        self.assertRedirects(response, reverse("ticket_login") + "?next=" + reverse("book_visit"))
+        self.assertRedirects(
+            response, settings.VIRTUALQ_WEB_ORIGIN + "/book-visit",
+            fetch_redirect_response=False,
+        )
         self.client.force_login(self.user)
         response = self.client.post(reverse("book_visit"), {
             "date_of_visit": str(date.today() + timedelta(days=2)),
@@ -113,7 +117,10 @@ class LocalDemoTest(TestCase):
         ticket = Ticket.objects.filter(user=self.user, guest_number=1).first()
         ticket.save()
         self.assertEqual(Guest.objects.filter(ticket=ticket).count(), 1)
-        self.assertRedirects(self.client.get(reverse("ticket_logout")), reverse("ticket_login"))
+        self.assertRedirects(
+            self.client.get(reverse("ticket_logout")), reverse("ticket_login"),
+            fetch_redirect_response=False,
+        )
         self.client.force_login(get_user_model().objects.get(username="demo-admin"))
         self.assertEqual(self.client.get("/admin/").status_code, 200)
 

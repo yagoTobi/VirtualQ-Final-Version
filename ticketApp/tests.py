@@ -2,12 +2,14 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import time, timedelta
 from io import StringIO
 import base64
+import secrets
 from threading import Barrier
 
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.db import close_old_connections, connection
 from django.test import TestCase, TransactionTestCase, override_settings
+from django.urls import reverse
 from django.utils import timezone
 from rest_framework.test import APIClient
 
@@ -119,6 +121,52 @@ class VisitBookingTest(TestCase):
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(Ticket.objects.count(), 1)
+
+    @override_settings(VIRTUALQ_WEB_ORIGIN="https://visitor.example.test")
+    def test_legacy_page_links_use_the_trusted_visitor_origin(self):
+        before = Ticket.objects.count()
+        for signed_in in (False, True):
+            if signed_in:
+                self.client.force_login(self.user)
+            for name in ("book_visit", "ticket_login"):
+                for method in (self.client.get, self.client.head):
+                    with self.subTest(signed_in=signed_in, name=name, method=method.__name__):
+                        response = method(
+                            reverse(name) + "?next=https://elsewhere.example.test/&date=2000-01-01",
+                        )
+                        self.assertRedirects(
+                            response, "https://visitor.example.test/book-visit",
+                            fetch_redirect_response=False,
+                        )
+                        self.assertIn("no-store", response["Cache-Control"])
+                self.assertEqual(self.client.put(reverse(name)).status_code, 405)
+        self.assertEqual(Ticket.objects.count(), before)
+
+    def test_open_legacy_forms_still_require_login_and_validate_credentials(self):
+        before = Ticket.objects.count()
+        response = self.client.post(reverse("book_visit"), {
+            "date_of_visit": str(self.visit), "additional_guests": 1,
+        })
+        self.assertRedirects(
+            response, reverse("ticket_login") + "?next=" + reverse("book_visit"),
+            fetch_redirect_response=False,
+        )
+        self.assertEqual(Ticket.objects.count(), before)
+        password = secrets.token_urlsafe(24)
+        self.user.set_password(password)
+        self.user.save()
+        response = self.client.post(reverse("ticket_login"), {
+            "username": self.user.username, "password": secrets.token_urlsafe(24),
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "ticketApp/login.html")
+        self.assertNotIn("_auth_user_id", self.client.session)
+        response = self.client.post(reverse("ticket_login"), {
+            "username": self.user.username, "password": password,
+        })
+        self.assertRedirects(response, reverse("book_visit"), fetch_redirect_response=False)
+        self.assertEqual(self.client.session["_auth_user_id"], str(self.user.pk))
+        self.assertIn("no-store", response["Cache-Control"])
 
     def test_ticket_qr_is_png_and_owner_only(self):
         path = f"/api/tickets/tickets/{self.tickets[0].pk}/qr/"
