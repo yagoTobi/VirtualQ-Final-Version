@@ -100,10 +100,12 @@ function GuestForm({ guest, onSaved }: { guest: Guest; onSaved: () => void }) {
   const [age, setAge] = useState(guest.age?.toString() || "");
   const [height, setHeight] = useState(guest.height?.toString() || "");
   const [busy, setBusy] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState<unknown>(null);
   async function save() {
     if (busy) return;
     setBusy(true);
+    setSaved(false);
     setError(null);
     try {
       await api(`/api/tickets/guests/guests/${guest.guest_id}/`, token, {
@@ -114,6 +116,7 @@ function GuestForm({ guest, onSaved }: { guest: Guest; onSaved: () => void }) {
           height: height || null,
         }),
       });
+      setSaved(true);
       onSaved();
     } catch (err) {
       setError(err);
@@ -132,25 +135,42 @@ function GuestForm({ guest, onSaved }: { guest: Guest; onSaved: () => void }) {
       <Field
         label="Guest name"
         value={name}
-        onChangeText={setName}
+        onChangeText={(value) => {
+          setName(value);
+          setSaved(false);
+        }}
+        editable={!busy}
         maxLength={20}
         autoCapitalize="words"
       />
       <Field
         label="Age (optional)"
         value={age}
-        onChangeText={setAge}
+        onChangeText={(value) => {
+          setAge(value);
+          setSaved(false);
+        }}
+        editable={!busy}
         keyboardType="number-pad"
         maxLength={3}
       />
       <Field
         label="Height in cm"
         value={height}
-        onChangeText={setHeight}
+        onChangeText={(value) => {
+          setHeight(value);
+          setSaved(false);
+        }}
+        editable={!busy}
         keyboardType="number-pad"
         maxLength={3}
       />
       <ErrorMessage error={error} />
+      {saved && (
+        <Alert accessibilityRole="alert" accessibilityLiveRegion="polite">
+          <AlertText>Guest details saved.</AlertText>
+        </Alert>
+      )}
       <Button onPress={save} isDisabled={busy || !name.trim()}>
         {busy && <ButtonSpinner />}
         <ButtonText>{busy ? "Saving…" : "Save guest details"}</ButtonText>
