@@ -570,8 +570,8 @@ walkthrough remains open. Legacy POST templates remain for compatibility until
 that parity check. Visitor forms need a desktop walkthrough. Complete large-font,
 screen-reader and long-history coverage remains beyond the sampled phone checks.
 Avatar selection is intentionally consolidated into initials until usable assets
-exist, as recorded in the migration plan. No physical device, iOS simulator,
-native release binary or app-store installation has been verified.
+exist, as recorded in the migration plan. Physical-device, iOS simulator runtime,
+native release runtime and app-store installation remain unverified.
 
 ## Selected native tab shape — 16 September 2026
 
@@ -687,3 +687,18 @@ The original six tickets remain. No catalog or historical database was changed.
 This closes the native signup submission and Explore/Plans completion checks
 from earlier checkpoints. Browser equivalents, password-reset UI submission,
 screen-reader feedback, iOS runtime and release performance remain unverified.
+
+## iOS native build checkpoint — 16 September 2026
+
+PR #18's complete CI run `35049875243` passed at `f7fda6b`, including the unsigned
+arm64 simulator Release build, architecture check and artifact upload. The
+downloaded archive contains an executable arm64 app and bundled JavaScript;
+its metadata identifies VirtualQ, the iPhoneSimulator platform and minimum
+iOS 16.4. Checksums, sizes, toolchain and reproduction commands are in
+[native builds](NATIVE_BUILDS.md#first-verified-artifact--16-september-2026).
+
+This adds native iOS compilation/package evidence to the earlier JavaScript
+exports. The current Mac has no Xcode, so the app has not been launched in an
+iOS simulator. The generated pod lock is being replayed with deployment mode
+in the follow-up CI check. Physical-device behavior, API connectivity, signing,
+App Store distribution and release performance are still open.

@@ -109,8 +109,9 @@ jobs:
       - name: Install CocoaPods dependencies
         run: |
           gem install cocoapods --version 1.17.0 --no-document
+          cp Podfile.lock ios/Podfile.lock
           cd ios
-          pod _1.17.0_ install
+          pod _1.17.0_ install --deployment
       - name: Build unsigned iOS simulator app with bundled JavaScript
         run: |
           xcodebuild -version

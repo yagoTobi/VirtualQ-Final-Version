@@ -173,3 +173,23 @@ measurements before targeting the navigation work.
 Raw data stays ignored in `.local/verification/profiles/`:
 `installed-map-detail.json`, `installed-map-framestats.txt` and
 `installed-map-reset.txt`.
+
+## Installed Android ELF alignment — 16 September 2026
+
+The installed CI debug APK's SHA-256 matches
+`.local/android-artifact/app-debug.apk`:
+`41b93db0e89d17952be4185d6d5dd93929edea6a02e22a6edea4821fe84824c9`
+(93,194,002 bytes). The earlier 93,194,006-byte measurement above describes the
+separate locally built APK.
+
+All 25 packaged arm64 `.so` libraries were inspected with NDK 27.1.12297006
+`llvm-objdump -p`. Every LOAD segment reports alignment `2**14` (16,384 bytes),
+including camera/barcode, Hermes, React Native, SVG, screens, Reanimated and
+Worklets libraries. This supplements the earlier APK zip-alignment check.
+Raw headers and a summary are ignored under
+`.local/verification/android-elf-alignment/`.
+
+This verifies ELF layout for the debug APK used in the Pixel walkthrough.
+Repeat both ELF and zip checks on the actual signed release APKs generated from
+the release AAB, including any additional 64-bit ABI. It does not establish
+release behavior, performance or store acceptance.
