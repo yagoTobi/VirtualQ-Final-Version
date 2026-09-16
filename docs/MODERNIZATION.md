@@ -203,6 +203,13 @@ passed; submission was tested through HTTP. Desktop, success-screen and
 accessibility coverage remain open, along with the other Django page migrations.
 See [verification evidence](VERIFICATION.md).
 
+Visitor web entry checkpoint (16 September): old booking and ticket-login GET
+and HEAD links redirect to the shared app's protected booking screen. Previously
+opened Django forms retain their POST behavior until browser parity is verified.
+67 backend tests pass, including trusted-origin redirects, no-cache responses,
+legacy authentication and the existing booking/reduction rules. Live HTTP checks
+reach the frontend HTML; this does not establish browser interaction parity.
+
 ## Git and data handling
 
 The installed-app walkthrough continued on

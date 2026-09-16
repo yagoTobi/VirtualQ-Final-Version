@@ -7,13 +7,17 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 
 from django.core.exceptions import ObjectDoesNotExist, ValidationError as ModelValidationError
+from django.conf import settings
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse
+from django.contrib.auth.views import redirect_to_login
+from django.http import HttpResponseRedirect, JsonResponse
 from django.templatetags.static import static
 from django.utils import timezone
+from django.views.decorators.cache import never_cache
+from django.views.decorators.debug import sensitive_post_parameters
+from django.views.decorators.http import require_http_methods
 
 from .forms import VisitForm
 from .models import Ticket, Guest
@@ -88,40 +92,41 @@ class TicketQRView(APIView):
         return response
 
 
-@login_required
+@never_cache
+@require_http_methods(["GET", "HEAD", "POST"])
 def book_visit(request):
-    if request.method == "POST":
-        form = VisitForm(request.POST)
-        if form.is_valid():
-            try:
-                tickets, _ = set_visit_party(request.user, **form.cleaned_data)
-            except ModelValidationError as error:
-                form.add_error(None, error)
-            else:
-                return render(
-                    request,
-                    "ticketApp/book_visit.html",
-                    {"form": form, "qr_codes": [qr_png_base64(ticket.ticket_id) for ticket in tickets]},
-                )
-
-    else:
-        form = VisitForm()
+    if request.method != "POST":
+        return HttpResponseRedirect(settings.VIRTUALQ_WEB_ORIGIN + "/book-visit")
+    # Keep already-open forms working until browser parity allows their removal.
+    if not request.user.is_authenticated:
+        return redirect_to_login(request.get_full_path())
+    form = VisitForm(request.POST)
+    if form.is_valid():
+        try:
+            tickets, _ = set_visit_party(request.user, **form.cleaned_data)
+        except ModelValidationError as error:
+            form.add_error(None, error)
+        else:
+            return render(
+                request,
+                "ticketApp/book_visit.html",
+                {"form": form, "qr_codes": [qr_png_base64(ticket.ticket_id) for ticket in tickets]},
+            )
 
     return render(request, "ticketApp/book_visit.html", {"form": form})
 
 
+@never_cache
+@sensitive_post_parameters("password")
+@require_http_methods(["GET", "HEAD", "POST"])
 def login_view(request):
-    if request.method == "POST":
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            username = form.cleaned_data.get("username")
-            password = form.cleaned_data.get("password")
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                login(request, user)
-                return redirect("book_visit")
-    else:
-        form = AuthenticationForm()
+    if request.method != "POST":
+        # The shared app retains its API session or asks the visitor to sign in.
+        return HttpResponseRedirect(settings.VIRTUALQ_WEB_ORIGIN + "/book-visit")
+    form = AuthenticationForm(request, data=request.POST)
+    if form.is_valid():
+        login(request, form.get_user())
+        return redirect("book_visit")
     return render(request, "ticketApp/login.html", {"form": form})
 
 
