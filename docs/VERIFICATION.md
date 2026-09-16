@@ -699,6 +699,8 @@ iOS 16.4. Checksums, sizes, toolchain and reproduction commands are in
 
 This adds native iOS compilation/package evidence to the earlier JavaScript
 exports. The current Mac has no Xcode, so the app has not been launched in an
-iOS simulator. The generated pod lock is being replayed with deployment mode
-in the follow-up CI check. Physical-device behavior, API connectivity, signing,
-App Store distribution and release performance are still open.
+iOS simulator. PR #20's complete CI run `35051746423` passed at `c8e1242`,
+including the native build with deployment-mode pod installation. The downloaded
+pod lock exactly matches the committed lock. Physical-device behavior, API
+connectivity, signing, App Store distribution and release performance are still
+open.

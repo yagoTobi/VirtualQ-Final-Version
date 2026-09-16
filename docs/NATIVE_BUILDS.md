@@ -145,9 +145,12 @@ was downloaded and inspected locally:
 - Bundle identifier `com.virtualq.app`, platform `iPhoneSimulator`, minimum iOS
   16.4, Xcode 26.4.1; light appearance and the `virtualq` URL scheme are present.
 
-The generated Podfile checksum matches the local generated project. The lock
-replay with deployment mode is a subsequent CI check; this first artifact was
-built before that enforcement was added. No simulator launch, physical iPhone
+The generated Podfile checksum matches the local generated project. This first
+artifact was built before deployment-mode lock enforcement was added. PR #20
+commit `c8e1242`, Actions run `35051746423`, subsequently passed all checks,
+including the native simulator build with `pod install --deployment`. Its
+downloaded `ios/Podfile.lock` exactly matches the committed
+`frontend/Podfile.lock`. No simulator launch, physical iPhone
 installation, network behavior, signing/distribution or release performance was
 verified by inspecting the archive.
 
