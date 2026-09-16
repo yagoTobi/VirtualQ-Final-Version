@@ -83,3 +83,15 @@ export function recordLabel(record: RecordData) {
       .join(" · ") || "Record"
   );
 }
+
+export function fieldValue(
+  value: RecordData[string] | undefined,
+  field?: FieldInfo,
+) {
+  if (value == null || value === "") return "—";
+  if (typeof value === "boolean") return value ? "Yes" : "No";
+  return (
+    field?.choices?.find((choice) => String(choice.value) === String(value))
+      ?.display_name ?? String(value)
+  );
+}
