@@ -19,6 +19,7 @@ export default function AccountLayout() {
       />
       <Stack.Screen name="sign-up" />
       <Stack.Screen name="reset-password" />
+      <Stack.Screen name="set-password" />
     </VisitorStack>
   );
 }
