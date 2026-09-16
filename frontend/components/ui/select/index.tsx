@@ -72,7 +72,7 @@ const selectTriggerStyle = tva({
 });
 
 const selectInputStyle = tva({
-  base: "px-3 placeholder:text-muted-foreground web:w-full h-full text-foreground/90 pointer-events-none web:outline-none ios:leading-[0px] py-0",
+  base: "px-3 web:w-full h-full text-foreground/90 pointer-events-none web:outline-none ios:leading-[0px] py-0",
   parentVariants: {
     size: {
       xl: "text-xl",
@@ -173,6 +173,7 @@ const SelectInput = React.forwardRef<
         },
       })}
       ref={ref}
+      placeholderTextColorClassName="accent-muted-foreground"
       {...props}
     />
   );
