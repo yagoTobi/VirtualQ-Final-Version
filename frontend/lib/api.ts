@@ -27,7 +27,11 @@ export class ApiError extends Error {
           .join("\n");
       return String(value ?? "Something went wrong. Please try again.");
     };
-    super(describe(details));
+    super(
+      status === 401
+        ? "Your session has ended. Sign out, then sign in again to continue."
+        : describe(details),
+    );
   }
 }
 

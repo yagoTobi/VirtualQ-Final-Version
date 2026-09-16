@@ -24,6 +24,13 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Date of birth cannot be in the future.")
         return value
 
+    def update(self, instance, validated_data):
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        # An in-flight profile edit must not restore stale authentication fields.
+        instance.save(update_fields=validated_data.keys())
+        return instance
+
 
 class UserSerializer(UserUpdateSerializer):
     class Meta(UserUpdateSerializer.Meta):

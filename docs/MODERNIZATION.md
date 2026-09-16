@@ -18,10 +18,10 @@ The historical database is preserved locally; migrations run against the separat
 | Baseline | Clean checkpoint; inventory and plan committed | Recorded |
 | Foundation | Pinned Expo/RN/gluestack v5; clean install; Android and web render shared controls; types pass | Runtime/build gates and CI passed |
 | Visitor migration | Every real route below works with shared gluestack UI; responsive and accessible feedback | Accounts, visits, guests, plans, ride passes and scanner migrated; remaining web pages/checks pending |
-| Operations | All management resources below have authorized search, forms, validation and confirmations | Pending |
-| Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | Pending |
-| Product verification | Browser and Pixel 10 critical-flow walkthrough, mobile/desktop screenshots, build checks | Pending |
-| Delivery | Small commits, reviewable PR, passing CI, setup/architecture/audit/maintenance docs | Pending |
+| Operations | All management resources below have authorized search, forms, validation and confirmations | Implemented; complete browser coverage and narrow-layout checks pending |
+| Reliability | Ownership, roles, capacity, overlaps, transactions and reset security regression tests pass | 62 backend tests pass; remaining audit tracks open |
+| Product verification | Browser and Pixel 10 critical-flow walkthrough, mobile/desktop screenshots, build checks | Pixel/native binary and partial browser evidence recorded; full workflow matrix pending |
+| Delivery | Small commits, reviewable PR, passing CI, setup/architecture/audit/maintenance docs | Stacked draft PRs and documentation maintained throughout; final delivery pending |
 
 No milestone is complete on build evidence alone when runtime verification is
 required. Physical-device and iOS simulator checks are reported separately.
