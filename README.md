@@ -21,7 +21,7 @@ Virtual Q is a comprehensive full-stack ecosystem designed to enhance the experi
    - [Reconstruct from a fresh clone](#reconstruct-from-a-fresh-clone)
    - [Database and configuration](#database-and-configuration)
    - [Verify the restoration](#verify-the-restoration)
-7. [Important Notes](#important-notes)
+7. [Legacy baseline notes](#legacy-baseline-notes)
 8. [Future Development](#future-development)
 9. [Contributing](#contributing)
 
@@ -295,11 +295,31 @@ npx expo export --platform android
 npx expo export --platform ios
 ```
 
-`make check` runs Django's system check, migration-drift check, and 11 regression tests. The tests cover account creation/login/profile/reset email, repeatable seeding, web ticket booking, reservation creation/listing/cancellation, invalid-batch rollback, maintenance/date rejection, ticket validation, and ownership isolation for the touched endpoints.
+`make check` runs Django's system check, migration-drift check and regression
+suite (67 tests as of 16 September 2026). Use the disposable file-backed test
+database described above to include concurrency cases. Current coverage also
+includes staff permissions, hierarchy consistency, overlapping bookings,
+capacity and password-reset/session races; see [the reliability review](docs/RELIABILITY.md).
 
 Browser walkthrough: log in as `demo` → ride-list icon → Python Plunge → book a spot → choose tomorrow and visitors → Confirm → profile icon → My Virtual Q Ride Reservations. The ticket icon on the profile screen opens the admission-ticket QR list. The ticket-booking website is at `http://localhost:8000/api/tickets/login/`.
 
-## Important Notes
+### Standalone queue simulation
+
+The historical experiment runs separately from the app:
+
+```sh
+.venv/bin/python -S QueueingSim.py
+```
+
+It uses only Python's standard library; NumPy is not required. Its random samples
+are not identical to the former NumPy sequence. The app's availability and
+capacity rules do not use this simulation.
+
+## Legacy baseline notes
+
+These limitations describe the retained `userApp-React-Native/` client. The
+replacement in `frontend/` and its remaining verification gaps are documented
+in [the modernization plan](docs/MODERNIZATION.md).
 
 - This is a restored local prototype. Search, map, itinerary, several profile menu destinations, and the mobile cancellation handler still contain placeholders. They are not completed by this setup repair.
 - Capacity enforcement, overlapping reservations, and validation on reservation edits need a separate correctness review before real park use.
