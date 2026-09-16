@@ -1,4 +1,4 @@
-# Native Android builds
+# Native builds
 
 The native project is generated from `frontend/app.json` and the pinned npm
 lockfile. `frontend/android/` and `frontend/ios/` are ignored build output.
@@ -71,6 +71,39 @@ arm64 debug build on Linux with JDK 17. It uploads
 ```sh
 gh run download RUN_ID --name virtualq-android-arm64-debug --dir .local/android-artifact
 ```
+
+## iOS simulator build
+
+The `ios` CI job uses the arm64 `macos-26` runner, Xcode 26.4.1, Node 22 and
+CocoaPods 1.17.0. It generates the `VirtualQ` workspace and scheme from the same
+Expo configuration and lockfile, installs pods, and builds Release for the iOS
+simulator with code signing disabled. The artifact must contain the arm64
+executable and bundled `main.jsbundle`. This is a simulator build, not an iPhone
+distribution archive or App Store release.
+
+The job runs for pull requests, main-branch pushes and manual workflow dispatches;
+feature-branch pushes do not duplicate the macOS job. On a successful run:
+
+```sh
+gh run download RUN_ID --name virtualq-ios-arm64-simulator-release --dir .local/ios-artifact
+tar -xzf .local/ios-artifact/build/VirtualQ.app.tar.gz -C .local/ios-artifact
+```
+
+The archive preserves the app's executable permissions. The artifact also
+includes the generated `ios/Podfile.lock` for the pod versions used in that run.
+Pod version locking across future rebuilds will be established after the first
+successful native build. On a Mac with Xcode and a booted arm64 simulator:
+
+```sh
+xcrun simctl install booted .local/ios-artifact/VirtualQ.app
+xcrun simctl launch booted com.virtualq.app
+```
+
+The JavaScript bundle uses the app's configured API address. With the default
+local address, run the Django backend on that Mac before using data-dependent
+screens. The current development machine has command-line tools but no Xcode.
+Local iOS project generation passes; the first CI build and simulator runtime
+verification are pending.
 
 ## Appearance and permissions
 
