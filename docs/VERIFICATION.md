@@ -1,5 +1,23 @@
 # Product verification
 
+## Framework static assets — 16 September 2026
+
+On `codex/virtualq-static-assets`, 165 checked-in vendor files were compared with
+official Django 4.1.9 and DRF 3.14.0 wheels. All matched, apart from line endings
+in one license file. The old copies were removed so installed Django 5.2.17 and
+DRF 3.18.1 provide their own static assets.
+
+- `findstatic --first` now resolves Django admin and DRF CSS to the installed
+  packages; app CSS still resolves to the repository's app-owned file.
+- `collectstatic` produced 164 files in a temporary directory. Current admin
+  CSS/scripts, DRF CSS, app CSS and a profile icon matched their source bytes.
+- The live `/admin/login/` returned 200, and all seven referenced local
+  styles/scripts returned the installed asset bytes over HTTP.
+- `manage.py check` passed. No model, migration, database or visitor UI changed.
+
+Desktop visual inspection is still open. Chrome on the emulator stopped at its
+first-run terms screen; no terms were accepted during this check.
+
 ## Password-change session checks — 16 September 2026
 
 On `codex/virtualq-session-revocation`, the installed `com.virtualq.app` Android

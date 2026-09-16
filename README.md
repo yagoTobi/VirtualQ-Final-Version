@@ -244,6 +244,22 @@ For a physical device, put the computer and device on the same network, add the 
 
 Expo Go must match SDK 48. Older Expo Go builds are available for Android and iOS Simulator; SDK 48 cannot use today's App Store Expo Go on a physical iPhone. A physical iPhone needs an SDK upgrade or a compatible development build. Expo Go installation and native app launch were verified on the existing Pixel 10 Android emulator, with ride/API requests and local thumbnails served by Django during that session. Native login/booking interactions, camera scanning, and physical-device installation remain unverified.
 
+### Django static assets
+
+Keep only app-owned CSS and images in `static/` and app static directories.
+Django and DRF supply their admin/API assets from the installed, pinned packages.
+Do not copy framework assets back into `static/admin/` or `static/rest_framework/`;
+those copies override the installed versions during local development.
+
+For a deployment, collect the assets into the ignored `staticfiles/` directory:
+
+```sh
+.venv/bin/python manage.py collectstatic --noinput
+```
+
+Serve that directory through the deployment's static-file host. Local `runserver`
+uses Django's static finders when debug mode is enabled.
+
 ### Verify the restoration
 
 ```sh
