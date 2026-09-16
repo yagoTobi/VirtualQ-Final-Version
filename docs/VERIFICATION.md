@@ -564,11 +564,11 @@ This pass does not establish large-font coverage, release FPS or iOS runtime.
 
 ## Checks still required
 
-Reset confirmation is migrated with the remaining checks listed above. Staff CRUD is implemented
-with the remaining browser coverage listed above. Existing Django booking/authentication pages still need their shared
-visual treatment. Visitor forms need a desktop web walkthrough. Additional
-large-font and smaller-phone coverage beyond the map, screen-reader and
-long-history checks remain.
+Reset confirmation is migrated with the remaining checks listed above. Staff
+CRUD and shared visitor web entry routes are implemented; their complete browser
+walkthrough remains open. Legacy POST templates remain for compatibility until
+that parity check. Visitor forms need a desktop walkthrough. Complete large-font,
+screen-reader and long-history coverage remains beyond the sampled phone checks.
 Avatar selection is intentionally consolidated into initials until usable assets
 exist, as recorded in the migration plan. No physical device, iOS simulator,
 native release binary or app-store installation has been verified.
@@ -612,3 +612,78 @@ Browser inventory remains empty and Safari control returns `cgWindowNotFound`.
 This checkpoint does not verify browser sign-in/booking, legacy POST-to-modern
 handoff, staff row edits/deletion/admission or desktop accessibility. Removal of
 compatibility forms remains conditional on those checks.
+
+## Compact phone and large-text checks — 16 September 2026
+
+The installed Pixel app was checked at 840 × 1470 px, density 420
+(320 × 560 dp), with font scale 1.6. Profile fields remained scrollable, and
+the save/cancel controls were reachable. The visit form exposed both Save visit
+and Back to tickets; Back returned to the ticket list without submitting a
+booking. No profile values or visitor records were changed.
+
+The check reproduced truncated Explore, Plans and Tickets tab labels. Native
+labels now use `adjustsFontSizeToFit` with `minimumFontScale={0.8}` alongside the
+existing one-line/max-multiplier settings. Explore and Tickets selection both
+retain full labels and rounded highlights at the tested size. Content text still
+uses the system's scaling; accessibility labels and touch targets are unchanged.
+
+![Tab labels at 160% text size](verification/android-large-text-tabs.png)
+![Reachable visit actions on the compact phone](verification/android-large-text-booking.png)
+
+Type checking, lint, all nine frontend tests and Android/iOS/web JavaScript
+exports passed. The original 1080 × 2424 px size, density 420,
+font scale 1.0, input method and hardware-keyboard preference were restored.
+Gboard opened a floating stylus/number pad during the profile check, so this does
+not establish docked-keyboard behavior at the compact size. TalkBack, iOS runtime
+and a complete large-text screen sweep remain open.
+
+## Shared form contrast — 16 September 2026
+
+Input and Select boundaries now use a dedicated, stronger input token.
+The Profile screen was visually checked in the installed Android app after a
+fresh Metro bundle. Empty and populated fields retained their layout, and
+their outlines were clearer against the white card. No values were saved.
+
+Calculated light and dark boundary, placeholder and focus ratios, before/after
+screenshots and the remaining coverage are in [the accessibility review](ACCESSIBILITY.md).
+The app currently forces light mode; dark token calculations are not dark-mode
+runtime verification.
+
+## Native registration and booking paths — 16 September 2026
+
+Code: `5f4748d`, installed Pixel 10 debug app, fresh Metro bundle and local API.
+No application code changed for this pass.
+
+Starting signed out, selecting Tickets opened sign-in. Create an account retained
+that destination. The native form submitted a temporary visitor with matching
+passwords and a 175 cm height, then opened the empty Tickets screen. You showed
+the created profile rather than a stale registration form.
+
+After signing out, Explore → Python Plunge → Reserve a ride requested sign-in.
+Successful sign-in returned to Python Plunge's reservation form. Book a park
+visit saved one admission ticket for 16 September. Returning to Explore retained
+the reservation route and refreshed its available visitors.
+
+Selecting the holder, reviewing 09:00 and confirming opened Plans with one
+Python Plunge reservation. Returning to Explore showed the saved confirmation
+without another submission action. Back to Explore returned to the ride list,
+where the next-pass banner appeared.
+
+The installed-app deep link
+`virtualq:///(visitor)/(plans)/reserve/2?date=2026-09-16` opened Java Jamboree within
+the Plans stack. With the holder selected, 09:00 was unavailable because of the
+existing reservation. Selecting 09:30, reviewing and confirming returned to
+Plans with both reservations. This verifies the direct Plans route; it is not
+evidence of an additional booking entry point in the Plans list.
+
+![Sign-in return and both reservation completion paths](verification/android-auth-booking-paths.png)
+
+Stored records matched the entered profile, one admission ticket and the two
+five-minute ride reservations. Sign-out revoked the test token. The temporary
+visitor and attached records were removed, the local credential fixture was
+deleted, and the original demo session was restored through native sign-in.
+The original six tickets remain. No catalog or historical database was changed.
+
+This closes the native signup submission and Explore/Plans completion checks
+from earlier checkpoints. Browser equivalents, password-reset UI submission,
+screen-reader feedback, iOS runtime and release performance remain unverified.

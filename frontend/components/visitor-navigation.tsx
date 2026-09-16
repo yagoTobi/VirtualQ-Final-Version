@@ -167,7 +167,12 @@ function VisitorTabBar({ state, navigation }: TabBarProps) {
                   // Full screen content retains the user's font scaling.
                   {...(Platform.OS === "web"
                     ? {}
-                    : { numberOfLines: 1, maxFontSizeMultiplier: 1.2 })}
+                    : {
+                        numberOfLines: 1,
+                        maxFontSizeMultiplier: 1.2,
+                        adjustsFontSizeToFit: true,
+                        minimumFontScale: 0.8,
+                      })}
                   className={active ? "text-primary" : "text-muted-foreground"}
                 >
                   {Platform.OS !== "web" && tab.name === "(map)"
