@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.forms import PasswordResetForm
+from django.db import transaction
 from rest_framework import generics, serializers, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
@@ -9,6 +10,7 @@ from rest_framework.throttling import AnonRateThrottle
 from rest_framework.views import APIView
 
 from .serializers import UserSerializer, UserUpdateSerializer
+from .models import CustomUser
 
 
 class AuthThrottle(AnonRateThrottle):
@@ -33,7 +35,11 @@ def login(request):
     user = authenticate(username=username, password=password) if isinstance(username, str) and isinstance(password, str) else None
     if user is None:
         return Response({"detail": "Invalid username or password."}, status=status.HTTP_400_BAD_REQUEST)
-    token, _ = Token.objects.get_or_create(user=user)
+    with transaction.atomic():
+        current = CustomUser.objects.select_for_update().filter(pk=user.pk).first()
+        if current is None or not current.is_active or current.password != user.password:
+            return Response({"detail": "Invalid username or password."}, status=status.HTTP_400_BAD_REQUEST)
+        token, _ = Token.objects.get_or_create(user=current)
     return Response({"token": token.key})
 
 
