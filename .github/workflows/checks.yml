@@ -47,3 +47,39 @@ jobs:
       - run: npm run build:web
       - name: Export Android and iOS JavaScript
         run: npx expo export --platform android --platform ios --output-dir dist-native
+
+  android:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      CI: "1"
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.0.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: actions/setup-java@v6.0.1
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Generate Android project from pinned Expo configuration
+        run: npx expo prebuild --platform android --no-install
+      - name: Build Android arm64 test APK
+        working-directory: frontend/android
+        run: ./gradlew :app:assembleDebug -PreactNativeArchitectures=arm64-v8a --console=plain --no-daemon
+      - name: Check APK 16 KB zip alignment
+        run: '"$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 4 android/app/build/outputs/apk/debug/app-debug.apk'
+      - uses: actions/upload-artifact@v7.0.1
+        with:
+          name: virtualq-android-arm64-debug
+          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7

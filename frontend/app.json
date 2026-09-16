@@ -6,17 +6,22 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "backgroundColor": "#F6F8F5",
+    "primaryColor": "#11605D",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.virtualq.app"
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#11605D",
         "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
+      "blockedPermissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
       "predictiveBackGestureEnabled": false,
       "package": "com.virtualq.app"
     },
@@ -28,6 +33,7 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      "expo-system-ui",
       ["expo-camera", {
         "cameraPermission": "Allow VirtualQ to scan your park ticket QR code.",
         "microphonePermission": false,
