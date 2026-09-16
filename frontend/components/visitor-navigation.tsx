@@ -149,6 +149,8 @@ function VisitorTabBar({ state, navigation }: TabBarProps) {
                 className="flex-1 min-h-14 py-1 items-center justify-center gap-1 rounded-xl data-[active=true]:bg-accent"
               >
                 <Box
+                  // Preserve the rounded native view while its background is absent.
+                  collapsable={false}
                   className={`w-14 h-7 rounded-full items-center justify-center ${active ? "bg-secondary" : ""}`}
                 >
                   <Icon
