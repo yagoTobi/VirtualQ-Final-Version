@@ -249,3 +249,42 @@ The exploratory `long-plans.json` used different gestures and is not part of
 the comparison. The temporary account and bookings were removed after sign-out,
 the original six tickets remain, and the demo session/device settings were
 restored.
+
+## Search input diagnostic — 17 September 2026
+
+Pixel 10, Android 17 / API 37, installed debug app `com.virtualq.app`, Metro
+development bundle at `933a0d8`, normal 1080 × 2424 px / density 420 / font scale
+1.0, and the same three demo rides. The search field was focused; a visible soft
+keyboard was not confirmed. These captures cover search input, not keyboard
+animation or individual keystroke latency.
+
+An initially stale DevTools connection returned zero commits despite screen
+changes. That capture was discarded. Reloading Metro established a fresh
+connection before two valid recordings. Each filled the complete text `Python`,
+verified one ride, then cleared search and verified all three rides. No app code
+changed between the recordings.
+
+| Measurement | First valid pass | Repeat |
+| --- | ---: | ---: |
+| React commits | 9 | 8 |
+| Sum of commit durations | 49.311 ms | 66.979 ms |
+| Total exclusive React work | 40.489 ms | 59.424 ms |
+| Maximum inclusive commit | 22.107 ms | 36.307 ms |
+| Explore screen renders | 2 | 2 |
+| InputInternal / TextInput renders | 6 / 4 | 6 / 4 |
+| Android frames reported by the CLI | 101 | 111 |
+| CLI deadline-miss count | 94 | 103 |
+
+The graphics counters were reset before each window. Their 47.5 / 53.1 second
+windows include operator pauses and cursor activity. The CLI estimated different
+frame deadlines in the two passes (33.3 / 16.7 ms); this is not a verified display
+refresh-rate change. Its high deadline-miss counts and the variable debug React
+timings require a matched Release check before attributing a bottleneck or
+changing rendering. They do not establish app FPS, input latency or a performance
+improvement. No speculative memoization was added.
+
+The Expo Router warning about a state update before mount appeared again before
+the first recording; its stack pointed to the initial-link handler. Dismissing
+the overlay and reloading allowed measurement, but did not fix that diagnostic.
+Raw exports and the derived summary remain ignored under
+`.local/verification/search-20260917/`.

@@ -135,9 +135,10 @@ the label and read-only presentation changes. The export is build evidence;
 the walkthrough used the development preview.
 
 After the date-input and guest-metadata fixes, type checking, linting, the web
-export and nine frontend tests passed again. The local backend suite ran 67 tests successfully
-with four database-specific checks skipped on SQLite; PostgreSQL checks remain
-part of CI.
+export and nine frontend tests passed again. The default in-memory SQLite run
+passed 63 tests and skipped four concurrency checks. On 17 September, all 67
+tests passed with zero skips using a disposable file-backed SQLite database,
+matching CI's configuration. PostgreSQL behavior remains unverified.
 
 ## Screenshots
 
