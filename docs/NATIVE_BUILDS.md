@@ -64,9 +64,10 @@ verification.
 
 ## CI artifact
 
-The `android` job in `.github/workflows/checks.yml` repeats prebuild and the
-arm64 debug build on Linux with JDK 17. It uploads
-`virtualq-android-arm64-debug` for seven days. After a successful run:
+The `android` job in `.github/workflows/checks.yml` repeats prebuild and builds
+arm64 Debug and Release QA APKs on Linux with JDK 17. It runs on pull requests,
+main-branch pushes and manual dispatches; feature pushes do not duplicate the
+native builds. Artifacts are retained for seven days. For the development app:
 
 ```sh
 gh run download RUN_ID --name virtualq-android-arm64-debug --dir .local/android-artifact
@@ -77,6 +78,33 @@ native libraries: every LOAD segment has 16 KB alignment. Its hash was matched
 against the installed APK. See [the binary audit](PERFORMANCE.md#installed-android-elf-alignment--16-september-2026).
 Repeat ELF and zip checks on release artifacts; the debug result is not a
 release certification.
+
+### Separate Android Release QA app
+
+The Release matrix entry changes the generated app's name to **VirtualQ Release
+QA**, package to `com.virtualq.app.releaseqa` and URL scheme to
+`virtualq-releaseqa`. Only the CI checkout's Expo configuration is changed.
+It installs alongside the development app with separate storage and cannot
+replace that app's session. The normal source configuration remains unchanged.
+
+The artifact contains production-mode bundled JavaScript and does not need
+Metro. CI checks for a nonempty `assets/index.android.bundle`, the QA package
+identifier, a non-debuggable manifest and 16 KB zip alignment. Expo's generated
+test signing key is retained: this is a local QA build, not store signing.
+
+```sh
+gh run download RUN_ID --name virtualq-android-arm64-release-qa --dir .local/android-release-qa
+adb install -r .local/android-release-qa/app-release.apk
+adb reverse tcp:8000 tcp:8000
+adb shell am start -n com.virtualq.app.releaseqa/.MainActivity
+```
+
+The bundle targets `http://127.0.0.1:8000`; start the local demo backend first.
+This configuration is intended for the available Android 17 / API 37 Pixel
+emulator, where Android permits localhost cleartext by default. No general
+cleartext exception is added. Older Android versions and physical devices need
+a separately verified HTTPS API configuration. Check the app's catalog and
+screens after installation; a successful build alone is not runtime evidence.
 
 ## iOS simulator build
 

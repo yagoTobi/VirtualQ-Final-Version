@@ -50,13 +50,26 @@ jobs:
         run: npx expo export --platform android --platform ios --output-dir dist-native
 
   android:
+    # PRs cover feature branches without duplicate native builds on each push.
+    if: github.event_name != 'push' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - variant: debug
+            task: assembleDebug
+            artifact: virtualq-android-arm64-debug
+          - variant: release
+            task: assembleRelease
+            artifact: virtualq-android-arm64-release-qa
     defaults:
       run:
         working-directory: frontend
     env:
       CI: "1"
+      EXPO_PUBLIC_API_URL: http://127.0.0.1:8000
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-node@v7.0.0
@@ -71,17 +84,42 @@ jobs:
           cache: gradle
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      - name: Give the Release QA app a separate identity
+        if: matrix.variant == 'release'
+        run: |
+          node <<'JS'
+          const fs = require('node:fs');
+          const config = JSON.parse(fs.readFileSync('app.json', 'utf8'));
+          config.expo.name = 'VirtualQ Release QA';
+          config.expo.android.package = 'com.virtualq.app.releaseqa';
+          config.expo.scheme = 'virtualq-releaseqa';
+          fs.writeFileSync('app.json', JSON.stringify(config, null, 2) + '\n');
+          JS
       - name: Generate Android project from pinned Expo configuration
         run: npx expo prebuild --platform android --no-install
       - name: Build Android arm64 test APK
         working-directory: frontend/android
-        run: ./gradlew :app:assembleDebug -PreactNativeArchitectures=arm64-v8a --console=plain --no-daemon
+        run: ./gradlew :app:${{ matrix.task }} -PreactNativeArchitectures=arm64-v8a --console=plain --no-daemon
+      - name: Check Release QA identity and bundled JavaScript
+        if: matrix.variant == 'release'
+        run: |
+          python - <<'PY'
+          from zipfile import ZipFile
+          with ZipFile('android/app/build/outputs/apk/release/app-release.apk') as apk:
+              assert apk.getinfo('assets/index.android.bundle').file_size > 0
+          PY
+          "$ANDROID_HOME/build-tools/36.0.0/aapt" dump badging android/app/build/outputs/apk/release/app-release.apk > /tmp/virtualq-release-badging.txt
+          grep -q "package: name='com.virtualq.app.releaseqa'" /tmp/virtualq-release-badging.txt
+          if grep -q '^application-debuggable' /tmp/virtualq-release-badging.txt; then
+            echo "::error::Release QA APK must not be debuggable."
+            exit 1
+          fi
       - name: Check APK 16 KB zip alignment
-        run: '"$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 4 android/app/build/outputs/apk/debug/app-debug.apk'
+        run: '"$ANDROID_HOME/build-tools/36.0.0/zipalign" -c -P 16 4 android/app/build/outputs/apk/${{ matrix.variant }}/app-${{ matrix.variant }}.apk'
       - uses: actions/upload-artifact@v7.0.1
         with:
-          name: virtualq-android-arm64-debug
-          path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          name: ${{ matrix.artifact }}
+          path: frontend/android/app/build/outputs/apk/${{ matrix.variant }}/app-${{ matrix.variant }}.apk
           if-no-files-found: error
           retention-days: 7
 
